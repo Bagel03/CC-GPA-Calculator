@@ -25,18 +25,54 @@ enum Letter {
     F = "F",
 }
 
-enum ClassType {
-    HONORS = "Honors",
-    AP = "AP",
-    REGULAR = "Regular",
-    GYM = "Gym",
-}
+class Class {
+    private constructor(
+        public readonly type: string,
+        public readonly weightModifier: (
+            raw: number,
+            totalGrades: number
+        ) => number,
+        public readonly classCheck: (str: string) => boolean
+    ) {}
 
-const classTypeChecks: Record<string, ClassType> = {
-    honors: ClassType.HONORS,
-    ap: ClassType.AP,
-    physical: ClassType.GYM,
-};
+    private static isHonors = (str: string) =>
+        str.toLowerCase().includes("hon");
+    private static isAP = (str: string) =>
+        str.toLowerCase().split(" ").includes("ap");
+    private static isGym = (str: string) =>
+        str.toLowerCase().includes("physical");
+    private static isRegular = (str: string) => false;
+    // !(this.isHonors(str) || this.isAP(str) || this.isGym(str));
+
+    public static readonly HONORS = new Class(
+        "Honors",
+        (raw, total) => (raw + 1) / total,
+        this.isHonors
+    );
+
+    public static readonly AP = new Class(
+        "AP",
+        (raw, total) => (raw + 1) / total,
+        this.isAP
+    );
+    public static readonly GYM = new Class(
+        "GYM",
+        (raw, total) => 0,
+        this.isGym
+    );
+    public static readonly REGULAR = new Class(
+        "Regular",
+        (raw, total) => raw / total,
+        this.isRegular
+    );
+
+    public static readonly types = [
+        this.HONORS,
+        this.REGULAR,
+        this.AP,
+        this.GYM,
+    ];
+}
 
 enum Modifiers {
     PLUS = "+",
@@ -68,7 +104,7 @@ class ClassGrade {
     constructor(
         public readonly className: string,
         public readonly percent: number,
-        public readonly type: ClassType = ClassType.REGULAR
+        public readonly type: Class = Class.REGULAR
     ) {
         const { value, modifier } = ClassGrade.fromPercent(percent);
         this.value = value;
@@ -85,8 +121,7 @@ class ClassGrade {
         let value = ClassGrade.weights[this.value];
         if (this.modifier == "+") value += 0.33;
         else if (this.modifier == "-") value -= 0.33;
-        if (this.type == ClassType.HONORS || this.type == ClassType.AP)
-            value += 1;
+        if (this.type == Class.HONORS || this.type == Class.AP) value += 1;
         return value;
     }
 
@@ -117,14 +152,14 @@ class ClassGrade {
     toString() {
         let str: string = this.value;
         if (this.modifier) str += this.modifier;
-        if (this.type == ClassType.GYM) str += "*";
+        if (this.type == Class.GYM) str += "*";
         return str;
     }
 
     static getTotalGPA(grades: ClassGrade[]) {
         let totalGrades = grades.length;
         let sum = grades.reduce((sum, currentGrade) => {
-            if (currentGrade.type === ClassType.GYM) {
+            if (currentGrade.type === Class.GYM) {
                 totalGrades--;
                 return sum;
             }
@@ -166,15 +201,13 @@ const getGradesAndClasses = () => {
     });
 
     const grades = gradeNums.map(([gradeNum, c]) => {
-        let classType = ClassType.REGULAR;
-        for (const [key, type] of Object.entries(classTypeChecks)) {
-            if (c.toLowerCase().includes(key)) {
-                classType = type;
-                break;
+        for (const classType of Class.types) {
+            if (classType.classCheck(c)) {
+                return new ClassGrade(c, gradeNum, classType);
             }
         }
 
-        return new ClassGrade(c, gradeNum, classType);
+        return new ClassGrade(c, gradeNum, Class.REGULAR);
     });
     return grades;
 };
@@ -265,8 +298,32 @@ const cb = () => {
     });
 };
 
-window.setTimeout(() => {
+declare const chrome: any;
+const agreement = `The CC GPA Calculator is NOT to be used as a replacement for report cards, and should NOT BE COMPLETELY TRUSTED. 
+This means: DO NOT DROP an assignment because it says you will be fine. 
+
+Your grades are your grades, the tool shouldn't affect that.
+
+Press OK if you understand`;
+const agreementToken = CC_GPA_INJECTOR + "-agreed";
+
+function checkAgreement() {
+    return new Promise((res, rej) => {
+        console.log("Checking agreement...");
+        chrome.storage.sync.get(agreementToken, (data: any) => {
+            res(data[agreementToken]);
+        });
+    });
+}
+window.setTimeout(async () => {
     if (!window.location.href.includes("progress")) return;
+    if (!(await checkAgreement())) {
+        if (window.confirm(agreement)) {
+            chrome.storage.sync.set({ [agreementToken]: true });
+        } else {
+            return;
+        }
+    }
 
     const observer = new MutationObserver(() => {
         if (document.getElementsByClassName("progress").length > 0) return;
