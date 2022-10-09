@@ -2,6 +2,7 @@ import { Class } from "./class.js";
 import { appendGrades } from "./rendering/append.js";
 import { renderGPA } from "./rendering/gpa.js";
 import { renderModal } from "./rendering/modal.js";
+// import { renderModal } from "./rendering/modal.js";
 
 export const CC_GPA_INJECTOR = "CC_GPA_INJECTOR";
 

@@ -18,115 +18,13 @@ D- 62 - 60 0.67 1.67
 F Below 60 0.00 0.00
 */
 
-// const styleEl = document.createElement("style");
-// styleEl.innerHTML = `
-// .gpaCenter {
-//     margin: 1em, 0.5em;
-//     padding: 1em, 0.5em;
-//     text-align: center;
-// }
-// `;
-// styleEl.id = CC_GPA_INJECTOR + "-styles";
-// document.head.appendChild(styleEl);
-
-// const renderModal = (grades: ClassGrade[]) => {
-//     const dialog = createEl("dialog");
-//     const container = createEl("div");
-//     container.style.width = "100%";
-//     dialog.append(container);
-//     dialog.id = CC_GPA_INJECTOR + "Modal";
-//     const gpaEl = createEl(
-//         "div",
-//         "",
-//         `Your CC GPA: ${ClassGrade.getTotalGPA(grades).toFixed(3)}`
-//     );
-
-//     const table = createEl("table");
-//     table.style.width = "auto";
-//     container.append(gpaEl, table);
-
-//     const colNames = createEl("tr");
-//     colNames.append(
-//         createEl("td", "", "Class Name"),
-//         createEl("td", "gpaCenter", "Class Type"),
-//         createEl("td", "gpaCenter", "Percentage"),
-//         createEl("td", "gpaCenter", "Letter Grade"),
-//         createEl("td", "gpaCenter", "GPA Weighting")
-//     );
-//     table.append(colNames);
-
-//     for (const grade of grades) {
-//         const row = createEl("tr");
-//         row.append(
-//             createEl("td", "", grade.className),
-//             createEl("td", "gpaCenter", grade.type.type),
-//             createEl("td", "gpaCenter", grade.percent.toString()),
-//             createEl("td", "gpaCenter", grade.toString()),
-//             createEl("td", "gpaCenter", grade.gpaWeight().toFixed(2))
-//         );
-//         table.append(row);
-//     }
-
-//     document.body.appendChild(dialog);
-// };
-
-// const renderGPA = (grades: ClassGrade[]) => {
-//     document
-//         .getElementById("performanceCollapse")!
-//         .getElementsByTagName("div")[0].id = "gpaParent";
-//     const link = createEl("a", "accordion-toggle");
-//     link.innerHTML = " CC GPA";
-//     link.id = "gpaDisplay";
-//     link.href = `javascript:document.getElementById('${
-//         CC_GPA_INJECTOR + "Modal"
-//     }').showModal()`;
-
-//     let x = createEl(
-//         "span",
-//         ["label", "label-success"],
-//         ClassGrade.getTotalGPA(grades).toFixed(3)
-//     );
-//     x.style.backgroundColor = "#004F9E";
-
-//     let br = createEl("br");
-//     let hr = createEl("hr");
-//     let y = document.getElementById("gpaParent")!;
-//     y.appendChild(x);
-//     y.appendChild(link);
-//     y.appendChild(br);
-//     y.appendChild(hr);
-// };
-
-// const renderGrades = (grades: ClassGrade[]) => {
-//     const gradeEls = Array.from(document.getElementsByClassName("showGrade"));
-
-//     let currentGradeToInsert = 0;
-//     let currentGradeEl = 0;
-//     while (currentGradeToInsert < grades.length) {
-//         if (
-//             !Number.isNaN(
-//                 parseFloat(
-//                     gradeEls[currentGradeEl].innerHTML
-//                         .toString()
-//                         .replace(/^\s+|\s+$/gm, "")
-//                         .replace(/%/g, "")
-//                 )
-//             )
-//         ) {
-//             gradeEls[
-//                 currentGradeEl
-//             ].innerHTML += `<span class="${CC_GPA_INJECTOR}"> (${grades[
-//                 currentGradeToInsert
-//             ].toString()})</span>`;
-//             currentGradeToInsert++;
-//         }
-//         currentGradeEl++;
-//     }
-// };
-
 let needReRender = true;
+let progressBar = document.getElementsByClassName(
+    "progress-bar"
+)[0] as HTMLDivElement;
+
 const observer = new MutationObserver(() => {
-    if (document.getElementsByClassName("progress").length > 0) {
+    if (progressBar.style.width !== "100%") {
         needReRender = true;
         return;
     }
@@ -134,4 +32,33 @@ const observer = new MutationObserver(() => {
     needReRender = false;
 });
 
-observer.observe(document.body, { childList: true });
+observer.observe(progressBar, { attributes: true, attributeFilter: ["style"] });
+
+const domObserver = new MutationObserver(() => {
+    if (document.getElementsByClassName("progress-bar").length < 1) {
+        if (progressBar) {
+            observer.disconnect();
+            //@ts-ignore
+            progressBar = null;
+
+            if (needReRender) {
+                render(parseClasses());
+                needReRender = false;
+            }
+        }
+        return;
+    } else {
+        if (!progressBar) {
+            progressBar = document.getElementsByClassName(
+                "progress-bar"
+            )[0] as HTMLDivElement;
+            observer.observe(progressBar, {
+                attributes: true,
+                attributeFilter: ["style"],
+            });
+            needReRender = true;
+        }
+    }
+});
+
+domObserver.observe(document.body, { childList: true });
