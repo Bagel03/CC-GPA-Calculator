@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Catholic Central GPA Calculator",
     "version": "1.0.0",
-    "description": "Automatically loads your GPA (according to CC's gpa scale) on MyCC's progress page",
+    "description": "Automatically loads your GPA on MyCC's progress page, as well as some other useful features",
     "content_scripts": [
         {
             "matches": [
@@ -23,8 +23,10 @@
             ]
         }
     ],
+    "host_permissions": [
+        "https://*.myschoolapp.com/*"
+    ],
     "permissions": [
-        "https://*.myschoolapp.com/*",
         "storage"
     ],
     "externally_connectable": {
