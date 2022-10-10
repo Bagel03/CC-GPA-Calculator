@@ -15,6 +15,7 @@ function injectScript(fileName: string) {
 }
 
 function injectScripts() {
+    console.log("Injecting...");
     injectScript(mainFile);
 }
 
@@ -30,7 +31,6 @@ const agreementToken = "agreed";
 
 function checkAgreement() {
     return new Promise((res, rej) => {
-        console.log("Checking agreement...");
         chrome.storage.sync.get(agreementToken, (data: any) => {
             res(data[agreementToken]);
         });
@@ -39,11 +39,8 @@ function checkAgreement() {
 
 // Main function
 (async function () {
-    // If were not on the progress page, quick exit
-    if (!window.location.toString().includes("progress")) return;
-
     if (!(await checkAgreement())) {
-        if (!window.confirm(agreement)) return;
+        if (!window.confirm(agreement)) return console.log("Agreement denied");
         chrome.storage.sync.set({ [agreementToken]: true });
     }
 

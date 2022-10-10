@@ -24,6 +24,8 @@ let progressBar = document.getElementsByClassName(
 )[0] as HTMLDivElement;
 
 const observer = new MutationObserver(() => {
+    if (!window.location.hash.includes("progress")) return;
+
     if (progressBar.style.width !== "100%") {
         needReRender = true;
         return;
@@ -31,8 +33,6 @@ const observer = new MutationObserver(() => {
     if (needReRender) render(parseClasses());
     needReRender = false;
 });
-
-observer.observe(progressBar, { attributes: true, attributeFilter: ["style"] });
 
 const domObserver = new MutationObserver(() => {
     if (document.getElementsByClassName("progress-bar").length < 1) {
@@ -61,4 +61,23 @@ const domObserver = new MutationObserver(() => {
     }
 });
 
-domObserver.observe(document.body, { childList: true });
+const onEnterProgressPage = () => {
+    observer.observe(progressBar, {
+        attributes: true,
+        attributeFilter: ["style"],
+    });
+
+    domObserver.observe(document.body, { childList: true });
+};
+const onExitProgressPage = () => {
+    observer.disconnect();
+    domObserver.disconnect();
+};
+
+window.addEventListener("hashchange", () => {
+    if (window.location.hash.includes("progress")) {
+        onEnterProgressPage();
+    } else {
+        onExitProgressPage();
+    }
+});
