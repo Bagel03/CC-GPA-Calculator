@@ -1,5 +1,7 @@
+import { Class, ClassProperties } from "../../class.js";
 import { CC_GPA_INJECTOR, createEl } from "../../renderer.js";
 import { modalOptions } from "../modal.js";
+import { rerenderGPA } from "./gpa.js";
 
 export const getTableCSS = () => `
 input[type="text"]{
@@ -24,6 +26,15 @@ tr:nth-child(even) {background: #f2f2f2}
     outline: none;
 }
 
+
+
+.${CC_GPA_INJECTOR}ClassName{
+    padding-right: 3em;
+}
+
+.${CC_GPA_INJECTOR}ClassType {
+    text-align: center
+}
 `;
 export const renderTable = () => {
     const table = createEl(
@@ -48,14 +59,22 @@ export const renderTable = () => {
         const row = createEl("tr");
         row.append(
             createEl("td", [], classInfo.period + "."),
-            createEl("td", [], classInfo.name)
+            createEl("td", [CC_GPA_INJECTOR + "ClassName"], classInfo.name),
+            createEl("td", [CC_GPA_INJECTOR + "ClassType"], classInfo.type)
         );
 
-        for (let i = 0; i < 4; i++) {
+        const classProps: (keyof ClassProperties)[] = [
+            "percent",
+            "letterGrade",
+            "gpa",
+        ];
+        for (const classProp of classProps) {
             const el = createEl("td");
             el.append(
                 createEl("input", [CC_GPA_INJECTOR + "Input"], "", {
                     type: "text",
+                    targetClassProp: classProp,
+                    targetClassPeriod: classInfo.period.toString(),
                 })
             );
             row.append(el);
@@ -64,8 +83,62 @@ export const renderTable = () => {
     }
 
     rerenderTable(table);
+    setupEventListeners(table);
     return table;
 };
+
+function setupEventListeners(table: HTMLTableElement) {
+    for (const el of table.getElementsByClassName(
+        CC_GPA_INJECTOR + "Input"
+    ) as HTMLCollectionOf<HTMLInputElement>) {
+        const targetProp = el.getAttribute(
+            "targetClassProp"
+        ) as keyof ClassProperties;
+
+        el.addEventListener("change", (e) => {
+            const classInfo = modalOptions.classes.find(
+                (c) =>
+                    c.period.toString() == el.getAttribute("targetClassPeriod")
+            )!;
+            const val = classInfo.isValid(targetProp, el.value);
+            if (val !== false) {
+                classInfo.set(targetProp, val);
+            }
+            el.blur();
+            rerenderClass(classInfo, table);
+            rerenderGPA(
+                document.getElementById(
+                    CC_GPA_INJECTOR + "ModalGpa"
+                ) as HTMLHeadingElement,
+                document.getElementById(CC_GPA_INJECTOR + "ModalGpaNum")!
+            );
+        });
+
+        el.addEventListener("keydown", (e) => {
+            if (e.key == "Enter") (e.target as HTMLInputElement).blur();
+        });
+    }
+}
+
+export function rerenderClass(classInfo: Class, table: HTMLTableElement) {
+    const items = table.querySelectorAll(
+        `[targetClassPeriod="${classInfo.period}"]`
+    ) as NodeListOf<HTMLInputElement>;
+    items[0].value = classInfo.grade.percent.toFixed(2);
+    items[1].value = classInfo.grade.toString();
+    items[2].value = modalOptions.isUnweighted
+        ? classInfo.grade.rawGPA().toFixed(2)
+        : classInfo.gpa().toFixed(2);
+    items[0].readOnly =
+        items[1].readOnly =
+        items[2].readOnly =
+            !modalOptions.isHypothetical;
+
+    items[2].setAttribute(
+        "targetClassProp",
+        modalOptions.isUnweighted ? "unweightedGpa" : "gpa"
+    );
+}
 
 export function rerenderTable(table: HTMLTableElement) {
     (table.getElementsByClassName(
@@ -74,24 +147,5 @@ export function rerenderTable(table: HTMLTableElement) {
         ? "Unweighted GPA"
         : "CC GPA";
 
-    const classEls = Array.from(table.getElementsByTagName("tr"));
-    classEls.shift();
-    for (let i = 0; i < classEls.length; i++) {
-        let items = Array.from(classEls[i].getElementsByTagName("td"))
-            .slice(2)
-            .map((cell) => cell.children[0] as HTMLInputElement);
-        items[0].value = modalOptions.classes[i].type;
-        items[1].value = modalOptions.classes[i].grade.percent.toFixed(2);
-        items[2].value = modalOptions.classes[i].grade.toString();
-        items[3].value = modalOptions.isUnweighted
-            ? modalOptions.classes[i].grade.rawGPA().toFixed(2)
-            : modalOptions.classes[i].gpa().toFixed(2);
-
-        items[0].readOnly =
-            items[1].readOnly =
-            items[2].readOnly =
-            items[3].readOnly =
-                !modalOptions.isHypothetical;
-        console.log(items[0].readOnly);
-    }
+    modalOptions.classes.forEach((c) => rerenderClass(c, table));
 }

@@ -1,10 +1,14 @@
 // This is the entry point, where we actually inject all the code.
 const mainFile = "script.js";
+const IS_DEV = true;
 
 // Inject the scripts into the page
 function injectScript(fileName: string) {
     const el = document.createElement("script");
-    el.setAttribute("src", chrome.runtime.getURL("dist/" + fileName));
+    el.setAttribute(
+        "src",
+        chrome.runtime.getURL((IS_DEV ? "dist/" : "") + fileName)
+    );
     el.setAttribute("type", "module");
 
     document.head.insertBefore(el, document.head.lastChild);

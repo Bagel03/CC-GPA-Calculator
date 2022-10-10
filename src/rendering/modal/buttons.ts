@@ -1,5 +1,5 @@
 import { CC_GPA_INJECTOR, createEl } from "../../renderer.js";
-import { modalOptions } from "../modal.js";
+import { modalOptions, resetClasses } from "../modal.js";
 import { rerenderGPA } from "./gpa.js";
 import { rerenderTable } from "./table.js";
 
@@ -58,7 +58,6 @@ function setupEventListeners(
         "#" + CC_GPA_INJECTOR + "ModalGpaNum"
     )! as HTMLSpanElement;
 
-    console.log(gpa);
     GPAType.addEventListener("click", (e) => {
         modalOptions.isUnweighted = !modalOptions.isUnweighted;
         rerenderGPATypeButton(GPAType);
@@ -68,6 +67,9 @@ function setupEventListeners(
 
     hypothetical.addEventListener("click", (e) => {
         modalOptions.isHypothetical = !modalOptions.isHypothetical;
+        if (!modalOptions.isHypothetical) {
+            resetClasses();
+        }
         rerenderHypotheticalButton(hypothetical);
         rerenderGPA(gpa, gpaNum);
         rerenderTable(table);

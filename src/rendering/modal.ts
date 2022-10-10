@@ -9,9 +9,13 @@ import {
 import { getGpaCSS, renderModalGpa } from "./modal/gpa.js";
 import { getTableCSS, renderTable } from "./modal/table.js";
 
+export function resetClasses() {
+    modalOptions.classes = modalOptions.originalClasses.map((c) => c.clone());
+}
+
 export function renderModal(classes: Class[]) {
-    modalOptions.classes = classes;
     modalOptions.originalClasses = classes;
+    resetClasses();
     const style = createEl(
         "style",
         [],
@@ -20,6 +24,7 @@ export function renderModal(classes: Class[]) {
     document.head.appendChild(style);
 
     const modal = createEl("dialog", [], "", { id: CC_GPA_INJECTOR + "Modal" });
+
     const close = createEl(
         "a",
         [],
@@ -37,9 +42,17 @@ export function renderModal(classes: Class[]) {
         }
     );
 
-    modal.append(close, renderModalGpa(), renderTable(), renderButtons());
+    modal.append(close);
+    if (classes.length == 0) {
+        modal.append(
+            createEl("h1", [], "No Quarter Grades", {}, { margin: "20px" })
+        );
+    } else {
+        modal.append(renderModalGpa(), renderTable(), renderButtons());
+    }
+
     document.body.appendChild(modal);
-    initButtonEventListeners();
+    if (classes.length > 0) initButtonEventListeners();
 }
 
 export const modalOptions = {

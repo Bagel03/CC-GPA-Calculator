@@ -72,4 +72,53 @@ export class Grade {
                 return this.letter.GPA - 0.33;
         }
     }
+
+    clone() {
+        return new Grade(this.percent);
+    }
+
+    static tryGetMinPercentFor(grade: string): string | false {
+        grade = grade.toUpperCase().trim().replace(" ", "");
+        try {
+            this.getMinPercentFor(grade);
+            return grade;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    static getMinPercentFor(grade: string) {
+        const letterStr = grade[0];
+        const modifier = grade[1];
+
+        if (letterStr == GradeLetter.F) return 0;
+
+        for (const letter of Letter.letters) {
+            if (letter.string !== letterStr) continue;
+
+            let minValue = letter.minValue + 2.5;
+            if (!modifier) return minValue;
+            else if (modifier == Modifier.MINUS) return minValue - 3;
+            else if (modifier == Modifier.PLUS) return minValue + 4;
+            else throw new Error("Wrong modifier");
+        }
+
+        throw new Error("No letter");
+    }
+
+    static rawGpaToMinGrade(rawGpa: number) {
+        for (const letter of Letter.letters) {
+            if (Math.round(rawGpa) !== letter.GPA) continue;
+
+            // This is the right letter
+            if (letter == Letter.F) return new Grade(0);
+
+            if (rawGpa - letter.GPA > 0)
+                return new Grade(letter.minValue + 6.5);
+            if (rawGpa - letter.GPA < 0)
+                return new Grade(letter.minValue - 0.5);
+            return new Grade(letter.minValue + 2.5);
+        }
+        return new Grade(0);
+    }
 }

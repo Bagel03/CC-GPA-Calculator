@@ -14,6 +14,20 @@ const classTypeGPAModifiers: Record<classType, (num: number) => number> = {
     [classType.UNCOUNTED]: (num) => 0,
 };
 
+const reverseClassTypeGPAModifiers: Record<classType, (num: number) => number> =
+    {
+        [classType.REGULAR]: (num) => num,
+        [classType.AP]: (num) => num - 1,
+        [classType.HONORS]: (num) => num - 1,
+        [classType.UNCOUNTED]: (num) => 0,
+    };
+
+export type ClassProperties = {
+    percent: number;
+    letterGrade: string;
+    gpa: number;
+    unweightedGpa: number;
+};
 export class Class {
     public readonly name: string;
     public readonly type: classType;
@@ -69,5 +83,71 @@ export class Class {
             return sum + curr.grade.rawGPA();
         }, 0);
         return total / (classes.length - uncounted);
+    }
+
+    clone() {
+        return new Class(
+            `${this.name} (Period ${this.period})`,
+            this.grade.percent,
+            this.rowEl
+        );
+    }
+
+    isValid<P extends keyof ClassProperties>(
+        prop: P,
+        str: string
+    ): ClassProperties[P] | false {
+        switch (prop) {
+            case "percent": {
+                str = str.replace("%", "");
+                let num = parseFloat(str);
+                return Number.isNaN(num) ? false : (num as ClassProperties[P]);
+            }
+            case "letterGrade":
+                return Grade.tryGetMinPercentFor(str) as ClassProperties[P];
+            case "gpa": {
+                if (this.type == classType.UNCOUNTED) return false;
+
+                let num = parseFloat(str);
+                if (Number.isNaN(num)) return false;
+                if (
+                    num >
+                    classTypeGPAModifiers[this.type](new Grade(100).rawGPA())
+                )
+                    return false;
+                return num as ClassProperties[P];
+            }
+            case "unweightedGpa": {
+                let num = parseFloat(str);
+                if (Number.isNaN(num)) return false;
+                if (num > new Grade(100).rawGPA()) return false;
+                return num as ClassProperties[P];
+            }
+        }
+
+        return false;
+    }
+
+    set<P extends keyof ClassProperties>(prop: P, val: ClassProperties[P]) {
+        switch (prop) {
+            case "letterGrade":
+                //@ts-ignore
+                this.grade = new Grade(Grade.getMinPercentFor(val as string));
+                break;
+            case "percent":
+                //@ts-ignore
+                this.grade = new Grade(val as number);
+                break;
+            case "gpa":
+                //@ts-ignore
+                this.grade = Grade.rawGpaToMinGrade(
+                    reverseClassTypeGPAModifiers[this.type](val as number)
+                );
+                break;
+            case "unweightedGpa": {
+                //@ts-ignore
+                this.grade = Grade.rawGpaToMinGrade(val as number);
+            }
+        }
     }
 }
