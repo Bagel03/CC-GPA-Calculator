@@ -1,15 +1,18 @@
 // Renders the small GPA bubble
 
 import { Class } from "../class.js";
+import { loadedClassesInfo } from "../loader.js";
 import { CC_GPA_INJECTOR, createEl } from "../renderer.js";
 
-export const renderGPA = (classes: Class[]) => {
+export const renderGPA = (classesInfo: loadedClassesInfo) => {
     document
         .getElementById("performanceCollapse")!
         .getElementsByTagName("div")[0].id = "gpaParent";
     const parent = document.getElementById("gpaParent")!;
 
-    const gradeNumber = Class.totalGPA(classes);
+    const gradeNumber = Class.totalGPA(
+        classesInfo.classes[classesInfo.defaultQuarter]!
+    );
     const isNan = Number.isNaN(gradeNumber);
     const linkTitle = isNan ? "No Grades" : "CC GPA";
 

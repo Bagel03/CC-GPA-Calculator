@@ -23,7 +23,7 @@ export const rerenderGPA = (ele: HTMLHeadingElement, num: HTMLSpanElement) => {
     if (modalOptions.isUnweighted) title = "Unweighted GPA: ";
     else title = "CC GPA: ";
 
-    if (modalOptions.isSemester) title = "Semester " + title;
+    // if (modalOptions.isSemester) title = "Semester " + title;
     if (modalOptions.isHypothetical) title = "Hypothetical " + title;
 
     ele.innerText = title;

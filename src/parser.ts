@@ -1,5 +1,6 @@
 import { Class } from "./class.js";
 
+// This function just loads all the classes on the page, it doesn't care about the current quarter
 export const parseClasses = () => {
     const rows = Array.from(
         document

@@ -1,5 +1,7 @@
+import { loadClasses } from "./loader.js";
 import { parseClasses } from "./parser.js";
 import { render } from "./renderer.js";
+import { DeferredPromise } from "./utils.js";
 /*
 Letter Numerical Academic Honors / Advanced
 Grade Grade Courses Courses
@@ -23,26 +25,55 @@ let progressBar = document.getElementsByClassName(
     "progress-bar"
 )[0] as HTMLDivElement;
 
-const observer = new MutationObserver(() => {
+let nonRenderLoadingPromise = new DeferredPromise();
+let isCurrentlyLoadingNonRender = false;
+
+export const startNonRenderLoading = () => {
+    nonRenderLoadingPromise = new DeferredPromise();
+    isCurrentlyLoadingNonRender = true;
+    return nonRenderLoadingPromise;
+};
+
+const observer = new MutationObserver(async () => {
     if (!window.location.hash.includes("progress")) return;
+
+    if (isCurrentlyLoadingNonRender) {
+        needReRender = false;
+        if (progressBar.style.width == "100%") {
+            nonRenderLoadingPromise.resolve();
+            isCurrentlyLoadingNonRender = false;
+        }
+        return;
+    }
 
     if (progressBar.style.width !== "100%") {
         needReRender = true;
         return;
     }
-    if (needReRender) render(parseClasses());
+
+    if (needReRender) {
+        console.log("Mutation Render");
+
+        render(await loadClasses());
+    }
     needReRender = false;
 });
 
-const domObserver = new MutationObserver(() => {
+const domObserver = new MutationObserver(async () => {
     if (document.getElementsByClassName("progress-bar").length < 1) {
         if (progressBar) {
             observer.disconnect();
             //@ts-ignore
             progressBar = null;
 
+            if (isCurrentlyLoadingNonRender) {
+                needReRender = false;
+                return;
+            }
+
             if (needReRender) {
-                render(parseClasses());
+                console.log("Dom Render");
+                render(await loadClasses());
                 needReRender = false;
             }
         }
@@ -62,6 +93,10 @@ const domObserver = new MutationObserver(() => {
 });
 
 const onEnterProgressPage = () => {
+    progressBar = document.getElementsByClassName(
+        "progress-bar"
+    )[0] as HTMLDivElement;
+
     observer.observe(progressBar, {
         attributes: true,
         attributeFilter: ["style"],
@@ -81,3 +116,9 @@ window.addEventListener("hashchange", () => {
         onExitProgressPage();
     }
 });
+
+if (window.location.hash.includes("progress")) {
+    onEnterProgressPage();
+}
+
+window.loadAllClasses = loadClasses;

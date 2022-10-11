@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "Catholic Central GPA Calculator",
-	"version": "1.0.0",
+	"version": "0.0.3",
 	"description": "Automatically loads your GPA on MyCC's progress page, as well as some other useful features",
 	"content_scripts": [
 		{

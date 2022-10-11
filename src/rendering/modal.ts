@@ -1,6 +1,6 @@
 import { Class } from "../class.js";
+import { loadedClassesInfo } from "../loader.js";
 import { CC_GPA_INJECTOR, createEl } from "../renderer.js";
-import { Semester } from "../semester.js";
 import {
     getButtonCSS,
     initButtonEventListeners,
@@ -13,8 +13,8 @@ export function resetClasses() {
     modalOptions.classes = modalOptions.originalClasses.map((c) => c.clone());
 }
 
-export function renderModal(classes: Class[]) {
-    modalOptions.originalClasses = classes;
+export function renderModal(classInfo: loadedClassesInfo) {
+    modalOptions.originalClasses = classInfo.classes[classInfo.defaultQuarter]!;
     resetClasses();
     const style = createEl(
         "style",
@@ -43,7 +43,7 @@ export function renderModal(classes: Class[]) {
     );
 
     modal.append(close);
-    if (classes.length == 0) {
+    if (modalOptions.classes.length == 0) {
         modal.append(
             createEl("h1", [], "No Quarter Grades", {}, { margin: "20px" })
         );
@@ -52,14 +52,18 @@ export function renderModal(classes: Class[]) {
     }
 
     document.body.appendChild(modal);
-    if (classes.length > 0) initButtonEventListeners();
+    if (modalOptions.classes.length > 0) initButtonEventListeners();
+}
+
+export enum Quarter {
+    FirstQuarter,
+    SecondQuarter,
 }
 
 export const modalOptions = {
     isHypothetical: false,
     isUnweighted: false,
-    isSemester: false,
+    currentType: Quarter.FirstQuarter,
     classes: [] as Class[],
     originalClasses: [] as Class[],
-    semesterClasses: null as null | Semester[],
 };

@@ -1,4 +1,5 @@
 import { Class } from "./class.js";
+import { loadedClassesInfo } from "./loader.js";
 import { appendGrades } from "./rendering/append.js";
 import { renderGPA } from "./rendering/gpa.js";
 import { renderModal } from "./rendering/modal.js";
@@ -34,9 +35,9 @@ const cleanup = () => {
     }
 };
 
-export const render = (classes: Class[]) => {
+export const render = (info: loadedClassesInfo) => {
     cleanup();
-    renderGPA(classes);
-    appendGrades(classes);
-    renderModal(classes);
+    renderGPA(info);
+    appendGrades(info);
+    renderModal(info);
 };
