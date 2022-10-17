@@ -1,5 +1,5 @@
 import { Class } from "./class.js";
-import { loadedClassesInfo } from "./loader.js";
+import { loadClasses } from "./class/load.js";
 import { appendGrades } from "./rendering/append.js";
 import { renderGPA } from "./rendering/gpa.js";
 import { renderModal } from "./rendering/modal.js";
@@ -35,9 +35,11 @@ const cleanup = () => {
     }
 };
 
-export const render = (info: loadedClassesInfo) => {
+let classes = null as unknown as Class[];
+export const render = async () => {
+    if (!classes) classes = await loadClasses(true);
     cleanup();
-    renderGPA(info);
-    appendGrades(info);
-    renderModal(info);
+    renderGPA(classes);
+    appendGrades(classes);
+    renderModal(classes);
 };

@@ -1,11 +1,13 @@
 import { CC_GPA_INJECTOR, createEl } from "../../renderer.js";
 import { modalOptions, resetClasses } from "../modal.js";
-import { rerenderGPA } from "./gpa.js";
+import { rerenderGpaBeforeAdded, rerenderGpa } from "./gpa.js";
 import { rerenderTable } from "./table.js";
 
 export const getButtonCSS = () => `
     .${CC_GPA_INJECTOR}ActionButton {
         float: right;
+        user-select: none;
+        width: 20%;
     }
     .${CC_GPA_INJECTOR}ActionButton:last-child {
         margin-right: 8px;
@@ -14,6 +16,7 @@ export const getButtonCSS = () => `
     .${CC_GPA_INJECTOR}ButtonRow {
         margin-top: 10px;
     }
+
 `;
 
 export const renderButtons = () => {
@@ -27,8 +30,6 @@ export const renderButtons = () => {
         "",
         { id: CC_GPA_INJECTOR + "HypotheticalButton" }
     );
-    const semester = createEl("button", [CC_GPA_INJECTOR + "ActionButton"]);
-    const calcMin = createEl("button", [CC_GPA_INJECTOR + "ActionButton"]);
 
     rerenderGPATypeButton(GPAType);
     rerenderHypotheticalButton(hypothetical);
@@ -48,21 +49,11 @@ function setupEventListeners(
     GPAType: HTMLButtonElement,
     hypothetical: HTMLButtonElement
 ) {
-    const table = document.querySelector(
-        "#" + CC_GPA_INJECTOR + "Table"
-    )! as HTMLTableElement;
-    const gpa = document.querySelector(
-        "#" + CC_GPA_INJECTOR + "ModalGpa"
-    )! as HTMLHeadingElement;
-    const gpaNum = document.querySelector(
-        "#" + CC_GPA_INJECTOR + "ModalGpaNum"
-    )! as HTMLSpanElement;
-
     GPAType.addEventListener("click", (e) => {
         modalOptions.isUnweighted = !modalOptions.isUnweighted;
         rerenderGPATypeButton(GPAType);
-        rerenderGPA(gpa, gpaNum);
-        rerenderTable(table);
+        rerenderGpa();
+        rerenderTable();
     });
 
     hypothetical.addEventListener("click", (e) => {
@@ -71,8 +62,8 @@ function setupEventListeners(
             resetClasses();
         }
         rerenderHypotheticalButton(hypothetical);
-        rerenderGPA(gpa, gpaNum);
-        rerenderTable(table);
+        rerenderGpa();
+        rerenderTable();
     });
 }
 
@@ -89,7 +80,7 @@ function rerenderGPATypeButton(button: HTMLButtonElement) {
 function rerenderHypotheticalButton(button: HTMLButtonElement) {
     button.innerHTML = modalOptions.isHypothetical
         ? "Show Real Grades"
-        : "Enter Hypothetical Grades";
+        : "Edit Grades";
     button.style.backgroundColor = modalOptions.isHypothetical
         ? "#004F9E"
         : "#b7da9b";

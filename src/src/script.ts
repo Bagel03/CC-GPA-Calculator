@@ -1,24 +1,5 @@
-import { loadClasses } from "./loader.js";
-import { parseClasses } from "./parser.js";
 import { render } from "./renderer.js";
 import { DeferredPromise } from "./utils.js";
-/*
-Letter Numerical Academic Honors / Advanced
-Grade Grade Courses Courses
-A+ 100 - 97 4.33 5.33
-A 96 - 93 4.00 5.00
-A- 92 - 90 3.67 4.67
-B+ 89 - 87 3.33 4.33
-B 86 - 83 3.00 4.00
-B- 82 - 80 2.67 3.67
-C+ 79 - 77 2.33 3.33
-C 76 - 73 2.00 3.00
-C- 72 - 70 1.67 2.67
-D+ 69 - 67 1.33 2.33
-D 66 - 63 1.00 2.00
-D- 62 - 60 0.67 1.67
-F Below 60 0.00 0.00
-*/
 
 let needReRender = true;
 let progressBar = document.getElementsByClassName(
@@ -29,7 +10,7 @@ let nonRenderLoadingPromise = new DeferredPromise();
 let isCurrentlyLoadingNonRender = false;
 
 export const startNonRenderLoading = () => {
-    nonRenderLoadingPromise = new DeferredPromise();
+    nonRenderLoadingPromise.reset();
     isCurrentlyLoadingNonRender = true;
     return nonRenderLoadingPromise;
 };
@@ -53,8 +34,7 @@ const observer = new MutationObserver(async () => {
 
     if (needReRender) {
         console.log("Mutation Render");
-
-        render(await loadClasses());
+        render();
     }
     needReRender = false;
 });
@@ -73,7 +53,8 @@ const domObserver = new MutationObserver(async () => {
 
             if (needReRender) {
                 console.log("Dom Render");
-                render(await loadClasses());
+
+                render();
                 needReRender = false;
             }
         }
@@ -87,6 +68,10 @@ const domObserver = new MutationObserver(async () => {
                 attributes: true,
                 attributeFilter: ["style"],
             });
+            if (isCurrentlyLoadingNonRender) {
+                nonRenderLoadingPromise.resolve();
+                isCurrentlyLoadingNonRender = false;
+            }
             needReRender = true;
         }
     }
@@ -120,5 +105,3 @@ window.addEventListener("hashchange", () => {
 if (window.location.hash.includes("progress")) {
     onEnterProgressPage();
 }
-
-window.loadAllClasses = loadClasses;

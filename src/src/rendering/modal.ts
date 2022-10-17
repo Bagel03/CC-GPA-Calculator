@@ -1,5 +1,6 @@
 import { Class } from "../class.js";
-import { loadedClassesInfo } from "../loader.js";
+import { getDefaultQuarter } from "../class/load.js";
+import { GradeTime } from "../class/props/time.js";
 import { CC_GPA_INJECTOR, createEl } from "../renderer.js";
 import {
     getButtonCSS,
@@ -7,24 +8,31 @@ import {
     renderButtons,
 } from "./modal/buttons.js";
 import { getGpaCSS, renderModalGpa } from "./modal/gpa.js";
+import { getSelectorCss, renderTimeSelector } from "./modal/selector.js";
 import { getTableCSS, renderTable } from "./modal/table.js";
 
 export function resetClasses() {
     modalOptions.classes = modalOptions.originalClasses.map((c) => c.clone());
 }
 
-export function renderModal(classInfo: loadedClassesInfo) {
-    modalOptions.originalClasses = classInfo.classes[classInfo.defaultQuarter]!;
-    resetClasses();
+export function loadCSS() {
     const style = createEl(
         "style",
         [],
-        getButtonCSS() + getGpaCSS() + getTableCSS()
+        getButtonCSS() + getGpaCSS() + getTableCSS() + getSelectorCss()
     );
     document.head.appendChild(style);
+}
+
+export function renderModal(classes: Class[]) {
+    modalOptions.originalClasses = classes;
+    modalOptions.currentView = getDefaultQuarter();
+
+    resetClasses();
+
+    loadCSS();
 
     const modal = createEl("dialog", [], "", { id: CC_GPA_INJECTOR + "Modal" });
-
     const close = createEl(
         "a",
         [],
@@ -42,28 +50,22 @@ export function renderModal(classInfo: loadedClassesInfo) {
         }
     );
 
-    modal.append(close);
-    if (modalOptions.classes.length == 0) {
-        modal.append(
-            createEl("h1", [], "No Quarter Grades", {}, { margin: "20px" })
-        );
-    } else {
-        modal.append(renderModalGpa(), renderTable(), renderButtons());
-    }
+    modal.append(
+        close,
+        renderModalGpa(),
+        renderTable(),
+        renderButtons(),
+        renderTimeSelector()
+    );
 
     document.body.appendChild(modal);
-    if (modalOptions.classes.length > 0) initButtonEventListeners();
-}
-
-export enum Quarter {
-    FirstQuarter,
-    SecondQuarter,
+    initButtonEventListeners();
 }
 
 export const modalOptions = {
     isHypothetical: false,
     isUnweighted: false,
-    currentType: Quarter.FirstQuarter,
+    currentView: GradeTime.FIRST_QUARTER,
     classes: [] as Class[],
     originalClasses: [] as Class[],
 };
