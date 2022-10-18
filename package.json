@@ -4,8 +4,7 @@
   "description": "A client side calculator for mycc with some other features",
   "main": "builder.js",
   "scripts": {
-    "package": "node builder.js",
-    "build": "babel src/src -d dist --extensions \".ts\""
+    "package": "node builder.js"
   },
   "repository": {
     "type": "git",
