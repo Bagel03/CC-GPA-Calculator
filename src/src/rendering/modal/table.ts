@@ -7,7 +7,6 @@ import { CC_GPA_INJECTOR, createEl } from "../../renderer.js";
 import { modalOptions } from "../modal.js";
 import { rerenderGpa } from "./gpa.js";
 
-const spots = [5, 20, 10, 15, 30];
 export const getTableCSS = () => `
 input[type="text"]{
     background: inherit;
@@ -15,27 +14,12 @@ input[type="text"]{
 
 tr.${CC_GPA_INJECTOR}:nth-child(even) {background: #f2f2f2}
 
-td.${CC_GPA_INJECTOR}:nth-child(1) {
-    width: ${spots[0]}%;
-    text-align: center;
-    padding: 2px;
-}
-td.${CC_GPA_INJECTOR}:nth-child(1)::after {
-    content: " . "
-}
-
 td.${CC_GPA_INJECTOR}:nth-child(2) {
-    padding-right: 4em;
-    width: ${spots[1]}%;
+    padding-right: 2em;
 }
 
-td.${CC_GPA_INJECTOR}:nth-child(3) {
-    margin-right: ${spots[3]}%;
-    width: ${spots[2]}%;
-}
-
-td.${CC_GPA_INJECTOR}:nth-child(4) {
-    margin-left: auto;
+.${CC_GPA_INJECTOR}ColSpace {
+    width: 10em;
 }
 
 .${CC_GPA_INJECTOR}ColTitle {
@@ -52,7 +36,7 @@ td.${CC_GPA_INJECTOR}:nth-child(4) {
 }
 .${CC_GPA_INJECTOR}Input{
     outline: none;
-    width: 100%;
+    width: 6em;
 }
 
 .${CC_GPA_INJECTOR}ClassName{
@@ -64,11 +48,15 @@ td.${CC_GPA_INJECTOR}:nth-child(4) {
 }
 `;
 
-const tableHeadingsAndProps: Record<GradeTime, [string, keyof ClassProps][]> = {
+const tableHeadingsAndProps: Record<
+    GradeTime,
+    ([string, keyof ClassProps] | "SPACE")[]
+> = {
     [GradeTime.FIRST_QUARTER]: [
         ["!Period", "period"],
         ["!Class", "name"],
         ["!Type*", "type"],
+        "SPACE",
         ["Percent", "gradePercent-0"],
         ["Grade", "gradeLetter-0"],
         ["GPA", "gpa-0"],
@@ -77,6 +65,7 @@ const tableHeadingsAndProps: Record<GradeTime, [string, keyof ClassProps][]> = {
         ["!Period", "period"],
         ["!Class", "name"],
         ["!Type*", "type"],
+        "SPACE",
         ["Percent", "gradePercent-1"],
         ["Grade", "gradeLetter-1"],
         ["GPA", "gpa-1"],
@@ -85,6 +74,7 @@ const tableHeadingsAndProps: Record<GradeTime, [string, keyof ClassProps][]> = {
     [GradeTime.OVERALL]: [
         ["!Period", "period"],
         ["!Class", "name"],
+        "SPACE",
         ["1st Qtr", "gradePercent-0"],
         ["2nd Qtr", "gradePercent-1"],
         ["Exam", "gradePercent-2"],
@@ -129,8 +119,13 @@ export function rerenderClass(classInfo: Class, table: HTMLTableElement) {
         i < tableHeadingsAndProps[modalOptions.currentView].length;
         i++
     ) {
-        const [title, propKey] =
-            tableHeadingsAndProps[modalOptions.currentView][i];
+        const arr = tableHeadingsAndProps[modalOptions.currentView][i];
+
+        if (arr == "SPACE") {
+            continue;
+        }
+
+        const [title, propKey] = arr;
         const prop = classInfo.getProp(propKey);
 
         if (
@@ -158,12 +153,21 @@ export const renderClass = (classInfo: Class) => {
 
     const headingsAndProps = tableHeadingsAndProps[modalOptions.currentView];
 
-    for (const [heading, propKey] of headingsAndProps) {
+    for (const arr of headingsAndProps) {
         const td = createEl("td");
+
+        if (arr == "SPACE") {
+            td.classList.add(CC_GPA_INJECTOR + "ColSpace");
+            row.append(td);
+            continue;
+        }
+
+        const [heading, propKey] = arr;
+
         if (heading.includes("*")) td.classList.add(CC_GPA_INJECTOR + "Center");
 
         if (!heading.startsWith("!")) {
-            td.style.width = `${spots[4] / (headingsAndProps.length - 3)}%`;
+            // td.style.width = `${spots[4] / (headingsAndProps.length - 3)}%`;
 
             const input = createEl("input", [CC_GPA_INJECTOR + "Input"], "", {
                 type: "text",
@@ -207,7 +211,17 @@ export const renderClass = (classInfo: Class) => {
 
 export const renderTitle = () => {
     const row = createEl("tr");
-    for (const [heading] of tableHeadingsAndProps[modalOptions.currentView]) {
+    for (const arr of tableHeadingsAndProps[modalOptions.currentView]) {
+        if (arr === "SPACE") {
+            row.append(
+                createEl("th", [
+                    CC_GPA_INJECTOR + "ColTitle",
+                    CC_GPA_INJECTOR + "ColSpace",
+                ])
+            );
+            continue;
+        }
+        const [heading] = arr;
         row.append(
             createEl(
                 "th",

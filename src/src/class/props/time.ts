@@ -7,7 +7,7 @@ export enum GradeTime {
     OVERALL,
 }
 
-export const TImeNames = {
+export const TimeNames = {
     [GradeTime.FIRST_QUARTER]: "1st Quarter",
     [GradeTime.SECOND_QUARTER]: "2nd Quarter",
     [GradeTime.EXAM]: "Exam",

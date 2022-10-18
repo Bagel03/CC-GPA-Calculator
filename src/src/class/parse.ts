@@ -22,6 +22,7 @@ export const getNameAndPeriodFromEl = (el: HTMLDivElement) => {
         .innerHTML.toString()
         .split("(Period");
     periodStr = periodStr.trim()[0];
+    name = name.slice(0, name.indexOf("-")).trim();
     return [name, periodStr];
 };
 

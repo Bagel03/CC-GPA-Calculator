@@ -1,11 +1,14 @@
 import { Class, ClassProps } from "../../class.js";
-import { TImeNames } from "../../class/props/time.js";
+import { TimeNames } from "../../class/props/time.js";
 import { CC_GPA_INJECTOR, createEl } from "../../renderer.js";
 import { modalOptions } from "../modal.js";
 
 export const getGpaCSS = () => `
     #${CC_GPA_INJECTOR}ModalGpa {
         margin-top: 4px;
+    }
+    #${CC_GPA_INJECTOR}ModalGpaNum{
+        font-weight: 500;
     }
 `;
 
@@ -23,9 +26,9 @@ export const rerenderGpaBeforeAdded = (
     ele: HTMLHeadingElement,
     num: HTMLSpanElement
 ) => {
-    let title = TImeNames[modalOptions.currentView];
+    let title = TimeNames[modalOptions.currentView];
     if (modalOptions.isUnweighted) title += " Unweighted GPA: ";
-    else title = "CC GPA: ";
+    else title += " CC GPA: ";
 
     if (modalOptions.isHypothetical) title += "Hypothetical " + title;
 
