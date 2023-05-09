@@ -34,5 +34,5 @@ jobs:
                   cp -R built/* .
                   rm -rf built/ node_modules/
                   git add .
-                  git commit -m "Built project"
+                  git commit -m "Automatic build from ${{github.sha}}"
                   git push origin built --force
