@@ -33,7 +33,8 @@ jobs:
                   git rm -rf .
                   cp -R built/* .
                   ls
-                  git rm -rf built/ node_modules/
+                  rm -rf built
+                  git rm -rf node_modules/
                   git add .
                   git commit -m "Built project"
                   git push origin built --force
