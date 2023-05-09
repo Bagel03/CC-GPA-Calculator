@@ -32,9 +32,7 @@ jobs:
                   git checkout built
                   git rm -rf .
                   cp -R built/* .
-                  ls
-                  rm -rf built
-                  git rm -rf node_modules/
+                  rm -rf built/ node_modules/
                   git add .
                   git commit -m "Built project"
                   git push origin built --force
