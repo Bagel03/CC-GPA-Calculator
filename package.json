@@ -1,0 +1,16 @@
+{
+  "name": "cc-gpa-calc-v2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/gpa-calc/calc.ts --bundle --minify --sourcemap --outfile=built/bundle.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "esbuild": "^0.17.18"
+  }
+}
