@@ -24,6 +24,9 @@ jobs:
             - name: Build project
               run: npm run build
 
+            - name: Get shortened commit hash
+              uses: benjlevesque/short-sha@v1.2
+
             - name: Copy built bundle to built branch
               run: |
                   git config --global user.name "GitHub Actions"
@@ -34,5 +37,5 @@ jobs:
                   cp -R built/* .
                   rm -rf built/ node_modules/
                   git add .
-                  git commit -m "Automatic build from {${{github.sha}}.slice(0, 7)}"
+                  git commit -m "Automatic build from ${{env.SHA}}"
                   git push origin built --force
