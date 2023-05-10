@@ -5,7 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "esbuild src/gpa-calc/calc.ts --bundle --minify --sourcemap --outfile=built/bundle.js"
+    "build": "esbuild src/gpa-calc/calc.ts --bundle --minify --sourcemap --outfile=built/bundle.js",
+    "package": "tsc src/index.ts --outDir \"./\"",
+    "dev": "tsc src/index.ts --outDir \"./\" --watch"
   },
   "keywords": [],
   "author": "",

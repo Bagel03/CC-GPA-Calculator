@@ -1,3 +1,4 @@
+import "../styles/hover.css";
 import { createEl } from "./elements.js";
 
 let toolTip: HTMLDivElement;

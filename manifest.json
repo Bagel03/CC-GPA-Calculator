@@ -9,17 +9,7 @@
                 "https://*.myschoolapp.com/*"
             ],
             "js": [
-                "dist/index.js"
-            ]
-        }
-    ],
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "/dist/**/*"
-            ],
-            "matches": [
-                "https://*.myschoolapp.com/*"
+                "index.js"
             ]
         }
     ],
