@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "esbuild src/gpa-calc/calc.ts --bundle --minify --sourcemap --outfile=built/bundle.js",
-    "package": "tsc src/index.ts --outDir \"./\"",
+    "package": "tsc --project tsconfig.package.json && copy manifest.json packaged && tar.exe acvf packaged.zip packaged",
     "dev": "tsc src/index.ts --outDir \"./\" --watch"
   },
   "keywords": [],
