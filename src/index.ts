@@ -1,7 +1,7 @@
 declare const chrome: any;
 
 class Injector {
-    static dev = localStorage.getItem("gpa-dev-env");
+    static readonly dev = localStorage.getItem("gpa-dev-env");
 
     static injectScript(filepath: string) {
         const script = document.createElement("script");
@@ -9,6 +9,7 @@ class Injector {
         if (!Injector.dev)
             filepath =
                 `https://bagel03.github.io/CC-GPA-Calculator/` + filepath;
+        else filepath = chrome.runtime.getURL("built/" + filepath);
 
         script.setAttribute("src", filepath);
         script.setAttribute("type", "module");
@@ -22,6 +23,7 @@ class Injector {
         if (!Injector.dev)
             filepath =
                 `https://bagel03.github.io/CC-GPA-Calculator/` + filepath;
+        else filepath = chrome.runtime.getURL("built/" + filepath);
 
         const link = document.createElement("link");
         link.setAttribute("rel", "stylesheet");

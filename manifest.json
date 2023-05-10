@@ -1,7 +1,8 @@
 {
+    "$schema": "https://json.schemastore.org/chrome-manifest",
     "manifest_version": 3,
     "name": "Catholic Central GPA Calculator",
-    "version": "0.1.0",
+    "version": "2.0.0",
     "description": "Automatically loads your GPA on MyCC's progress page, as well as some other useful features",
     "content_scripts": [
         {
@@ -10,6 +11,16 @@
             ],
             "js": [
                 "index.js"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "/built/*"
+            ],
+            "matches": [
+                "https://*.myschoolapp.com/*"
             ]
         }
     ],
