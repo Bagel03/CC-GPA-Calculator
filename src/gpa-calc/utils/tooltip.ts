@@ -14,7 +14,6 @@ export function addToolTip(element: HTMLDivElement, string: string) {
     element.dataset.toolTipMessage = string;
 
     element.addEventListener("mouseover", () => {
-        console.log("hover");
         if (!element.classList.contains("has-tooltip")) return;
 
         const { top, left, width, height, bottom } =

@@ -1,25 +1,25 @@
-import { fetchClasses } from "../../../../api/classes.js";
-import { fetchClassInfo } from "../../../../api/class_info.js";
+import { fetchClasses } from "../../../api/classes.js";
+import { fetchClassInfo } from "../../../api/class_info.js";
 import {
     fetchMarkingPeriods,
     getCurrentMarkingPeriod,
-} from "../../../../api/marking_period.js";
+} from "../../../api/marking_period.js";
 import {
     ClassType,
     getClassTypeFromName,
     getClassTypeName,
     getNumberOfClassesOfType,
-} from "../../../../grades/class_type.js";
+} from "../../../grades/class_type.js";
 import {
     getExamGradeForOverall,
     getOverallGrade,
     GradePeriod,
-} from "../../../../grades/exams.js";
-import { Grade } from "../../../../grades/grade.js";
-import { createEl } from "../../../../utils/elements.js";
-import { selectContentEditableElement } from "../../../../utils/select.js";
-import { addToolTip, removeToolTip } from "../../../../utils/tooltip.js";
-import { rerenderAllGPAs } from "./footer.js";
+} from "../../../grades/exams.js";
+import { Grade } from "../../../grades/grade.js";
+import { createEl } from "../../../utils/elements.js";
+import { selectContentEditableElement } from "../../../utils/select.js";
+import { addToolTip, removeToolTip } from "../../../utils/tooltip.js";
+import { rerenderAllGPAs } from "./quarter/footer.js";
 
 export async function renderExamTable(year?: string, duration?: string) {
     // markingPeriod ??= await getCurrentMarkingPeriod();

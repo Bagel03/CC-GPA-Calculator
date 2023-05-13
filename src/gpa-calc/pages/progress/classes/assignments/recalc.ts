@@ -1,4 +1,4 @@
-import { getSectionWeights, TOTAL_POINTS } from "../weights.js";
+import { getSectionWeightsAndInfo, TOTAL_POINTS } from "../weights.js";
 
 export async function recalculateGrade(classId: string) {
     // Render individual sections
@@ -8,8 +8,17 @@ export async function recalculateGrade(classId: string) {
 
     const sectionTotals = new Map<string, { current: number; max: number }>();
 
+    const { weights, droppedAssignments } = await getSectionWeightsAndInfo(
+        classId
+    );
+
+    const assignmentsBySection = new Map<
+        string,
+        { score: number; max: number }[]
+    >();
+
     // Load grades
-    for (const grade of grades) {
+    grades.forEach((grade) => {
         const section =
             grade.parentElement /* tr */.parentElement
                 ./* tbody */ parentElement /* table */.previousElementSibling
@@ -22,10 +31,45 @@ export async function recalculateGrade(classId: string) {
             .split("/")
             .map((x) => parseFloat(x));
 
-        const sectionTotal = sectionTotals.get(section);
-        sectionTotal.current += score;
-        sectionTotal.max += gradeMax;
+        if (!assignmentsBySection.has(section)) {
+            assignmentsBySection.set(section, []);
+        }
+
+        assignmentsBySection.get(section).push({ score, max: gradeMax });
+        // const sectionTotal = sectionTotals.get(section);
+
+        // sectionTotal.current += score;
+        // sectionTotal.max += gradeMax;
+    });
+
+    // Factor in the dropped assignments
+    for (const [section, dropped] of Object.entries(droppedAssignments)) {
+        const assignments = assignmentsBySection.get(section);
+        for (let i = 0; i < dropped; i++) {
+            let min = Infinity;
+            let minIdx = -1;
+            for (let i = 0; i < assignments.length; i++) {
+                const percentage = assignments[i].score / assignments[i].max;
+
+                if (percentage < min) {
+                    minIdx = i;
+                    min = percentage;
+                }
+            }
+            assignments.splice(minIdx, 1);
+        }
     }
+
+    // Calculate the section totals
+    assignmentsBySection.forEach((assignments, section) => {
+        const max = assignments.reduce((prev, curr) => prev + curr.max, 0);
+        const current = assignments.reduce(
+            (prev, curr) => prev + curr.score,
+            0
+        );
+
+        sectionTotals.set(section, { current, max });
+    });
 
     sectionTotals.forEach(({ current, max }, sectionID) => {
         const percentage = (current / max) * 100;
@@ -41,8 +85,6 @@ export async function recalculateGrade(classId: string) {
         bar.style.width = percentage.toFixed(2) + "%";
     });
 
-    const weights = await getSectionWeights(classId);
-
     let overallGrade = "";
     if (weights == TOTAL_POINTS) {
         let current = 0;
@@ -56,21 +98,18 @@ export async function recalculateGrade(classId: string) {
     } else {
         let total = 0;
         sectionTotals.forEach(({ current, max }, id) => {
-            total += (current / max) * (weights.get(parseInt(id)) / 100);
+            total += (current / max) * (weights[id] / 100);
         });
 
         // Check for incomplete grades
-
         let maxTotal = 0;
-        for (const max of weights.values()) {
+        for (const max of Object.values(weights)) {
             maxTotal += max;
         }
 
         if (maxTotal < 100) {
             total *= 100 / maxTotal;
         }
-
-        console.log(maxTotal);
 
         overallGrade = (total * 100).toFixed(2);
     }

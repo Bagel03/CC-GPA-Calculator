@@ -8,7 +8,7 @@ import {
 } from "../../../../grades/gpa.js";
 import { Grade } from "../../../../grades/grade.js";
 import { createEl } from "../../../../utils/elements.js";
-import { renderExamTable } from "./exam_table.js";
+import { renderExamTable } from "../exam_table.js";
 import { renderTable } from "./table.js";
 
 export function renderFooter() {
@@ -117,8 +117,6 @@ export function renderFooter() {
                 document
                     .getElementById("gpa-table")
                     .replaceWith(await renderExamTable());
-
-                console.log("Rendering now");
 
                 rerenderAllGPAs();
                 return;
