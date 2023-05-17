@@ -7,7 +7,7 @@ import { renderHeader } from "./quarter/header.js";
 import { renderTable } from "./quarter/table.js";
 import { renderQuarterModal } from "./quarter/modal.js"
 
-const siteModal = document.getElementById("site-modal")
+let siteModal = document.getElementById("site-modal")
 
 
 export enum ModalType {
@@ -18,6 +18,8 @@ export enum ModalType {
 window.closeGPAModal = closeModal;
 
 export async function renderModal(type: ModalType = ModalType.QUARTER) {
+    siteModal = document.getElementById("site-modal")
+
     const container = createEl("div", ["modal-dialog", "modal-lg"]);
     siteModal.append(container);
     const modal = createEl("div", ["modal-content", "gradebook-analysis", "gpa-calc-modal"]);
