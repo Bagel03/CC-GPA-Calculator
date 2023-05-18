@@ -22,7 +22,13 @@ export async function getClassSettingsBody(classID: string, className: string) {
     const isTotalPoints = sectionInfo.weights === TOTAL_POINTS;
     classSettings.gradeFormula ??= isTotalPoints ? TOTAL_POINTS : WEIGHTED;
 
-    const body = createEl("div", ["modal-body"]);
+    const body = createEl(
+        "div",
+        ["modal-body"],
+        "",
+        {},
+        { overflowY: "scroll" }
+    );
 
     const sectionTitle = createEl(
         "div",
