@@ -62,6 +62,10 @@ export async function recalculateGrade(classId: string) {
 
     // Calculate the section totals
     assignmentsBySection.forEach((assignments, section) => {
+        assignments = assignments.filter(
+            ({ score, max }) => !(Number.isNaN(score) || Number.isNaN(max))
+        );
+
         const max = assignments.reduce((prev, curr) => prev + curr.max, 0);
         const current = assignments.reduce(
             (prev, curr) => prev + curr.score,

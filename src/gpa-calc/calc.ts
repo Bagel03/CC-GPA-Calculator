@@ -1,7 +1,7 @@
 import { renderProgress } from "./pages/progress/progress.js";
 
 // Check for new update
-const currentVersion = 2.1;
+const currentVersion = 2.11;
 const lastVersion = localStorage.getItem("gpa-calc-last-version");
 if (!lastVersion || parseFloat(lastVersion) < currentVersion) {
     alert("CC GPA Calculator updated successfully to v" + currentVersion);
