@@ -3,7 +3,6 @@ import {
     ClassType,
     getClassTypeFromName,
     getClassTypeName,
-    getNumberOfClassesOfType,
 } from "../../../../grades/class_type.js";
 import { Grade } from "../../../../grades/grade.js";
 import { createEl } from "../../../../utils/elements.js";
@@ -36,13 +35,24 @@ export async function renderTable(markingPeriod?: string) {
     const body = createEl("tbody");
     table.append(body);
     const classes = await fetchClasses();
+
+    let numUnmarked = 0;
+    let numWithoutGrades = 0;
     classes.forEach((c) => {
         const row = createEl("tr");
         body.append(row);
 
         const name = c.sectionidentifier;
         const type: ClassType = getClassTypeFromName(name);
-        if (type == ClassType.UNMARKED) return;
+        if (type == ClassType.UNMARKED) {
+            numUnmarked++;
+            return;
+        }
+        if (c.cumgrade == null) {
+            numWithoutGrades++;
+            return;
+        }
+
         const grade = new Grade(parseFloat(c.cumgrade));
 
         const els = [
@@ -113,14 +123,29 @@ export async function renderTable(markingPeriod?: string) {
         });
     });
 
-    const numUnmarked = getNumberOfClassesOfType(classes, ClassType.UNMARKED);
+    const strs: string[] = [];
+
     if (numUnmarked > 0) {
+        strs.push(
+            `${numUnmarked} unmarked class${numUnmarked > 1 ? "es" : ""}`
+        );
+    }
+
+    if (numWithoutGrades > 0) {
+        strs.push(
+            `${numWithoutGrades} class${
+                numWithoutGrades > 1 ? "es" : ""
+            } without grades`
+        );
+    }
+
+    if (strs.length > 0) {
         const unmarkedRow = createEl("tr");
         table.append(unmarkedRow);
         const unmarkedCol = createEl(
             "th",
             ["muted"],
-            `Table does not include ${numUnmarked} unmarked classes`,
+            `Table does not include ${strs.join(" and ")}`,
             { colspan: "5" },
             { textAlign: "center" }
         );

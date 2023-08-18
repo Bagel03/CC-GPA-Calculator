@@ -295,7 +295,9 @@ export async function renderExamTable(year?: string, duration?: string) {
         const unmarkedCol = createEl(
             "th",
             ["muted"],
-            `Table does not include ${numUnmarked} unmarked classes`,
+            `Table does not include ${numUnmarked} unmarked class${
+                numUnmarked > 1 ? "es" : ""
+            }`,
             { colspan: "7" },
             { textAlign: "center" }
         );

@@ -23,10 +23,13 @@ export function getAverageGPA(
     classes: any[],
     formula: GpaFormula = GpaFormula.CC
 ) {
-    let grades = classes.map((c) => ({
-        grade: new Grade(c.cumgrade),
-        name: c.sectionidentifier as string,
-    }));
+    let grades = classes
+        .filter((c) => c.cumgrade !== null)
+        .map((c) => ({
+            grade: new Grade(c.cumgrade),
+            name: c.sectionidentifier as string,
+        }));
+
     grades = grades.filter(
         (g) => getClassTypeFromName(g.name) != ClassType.UNMARKED
     );

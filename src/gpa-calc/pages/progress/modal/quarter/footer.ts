@@ -1,7 +1,5 @@
-import { fetchClasses } from "../../../../api/classes.js";
 import { ClassType } from "../../../../grades/class_type.js";
 import {
-    getAverageGPA,
     getAverageGPAFromRawData,
     getNameForGpaFormula,
     GpaFormula,

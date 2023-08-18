@@ -7,9 +7,8 @@ export const getCurrentSchoolYear = () => {
     if (month < 6) {
         schoolYear = currYear - 1 + " - " + schoolYear;
     } else {
-        schoolYear = schoolYear + " - " + currYear + 1;
+        schoolYear = schoolYear + " - " + (currYear + 1);
     }
 
-
     return schoolYear;
-}
+};
