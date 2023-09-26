@@ -4,28 +4,67 @@ import { renderLinks } from "./assignments/links.js";
 import { renderResetButton } from "./assignments/reset.js";
 import { renderClassPercentage } from "./percentage.js";
 
-export function renderClasses() {
-    const siteModal = document.getElementById("site-modal")
+async function renderClassModalAfterFullyLoaded() {
+    console.log("Rendering");
+    const name =
+        document.getElementsByClassName("modal-header")[0].children[1]
+            .innerHTML;
+    const currentClass = await fetchClasses().then((res) =>
+        res.find((c) => c.sectionidentifier == name)
+    );
 
-    const observer = new MutationObserver(async (ev) => {
-        if (siteModal.children.length == 0) return;
-        if (siteModal.children[0]?.children[0]?.classList.contains("gpa-calc-modal")) return;
+    await Promise.all([
+        renderClassPercentage(currentClass.sectionid),
+        renderResetButton(),
+        renderLinks(currentClass.sectionid),
+    ]);
+}
 
-        await waitForPromiseBar();
-        // const progressBar = (document.getElementsByClassName("progress-bar") as HTMLCollectionOf<HTMLDivElement>)[0];
-        // if (progressBar.style.width !== "100%") return;
+function renderClasses() {
+    console.log("Will render classes when ready....");
 
-        const name = document.getElementsByClassName("modal-header")[0].children[1].innerHTML;
-        const currentClass = await fetchClasses().then(res => res.find(c => c.sectionidentifier == name));
+    let alreadyRendered = false;
+    const cancelID = setInterval(() => {
+        if (alreadyRendered) return;
 
-        // await new Promise(res => setTimeout(res, 300))
+        const progresses = document.getElementsByClassName("progress-bar-info");
+        if (progresses.length === 0) {
+            alreadyRendered = true;
+            renderClassModalAfterFullyLoaded()
+                .then((_) => clearInterval(cancelID))
+                .catch((err) => {
+                    alreadyRendered = false;
+                    console.warn("err");
+                });
+            return;
+        }
 
+        const progressBar = progresses[0] as HTMLDivElement;
+        if (progressBar.style.width !== "100%") return;
+        renderClassModalAfterFullyLoaded();
+        clearInterval(cancelID);
+    }, 5);
+}
 
-        renderClassPercentage(currentClass.sectionid);
-        renderResetButton();
-        renderLinks(currentClass.sectionid);
-        // observer.disconnect();
-    })
+export function setupObserverToRenderClasses() {
+    let currentlyRendered = false;
+    const observer = new MutationObserver((ev) => {
+        const { classList } = document.body;
+        if (
+            !classList.contains("modal-open") ||
+            classList.contains("gpa-calc-modal-open")
+        ) {
+            currentlyRendered = false;
+            return;
+        }
 
-    observer.observe(siteModal, { childList: true });
+        if (!currentlyRendered && classList.contains("modal-open")) {
+            renderClasses();
+            currentlyRendered = true;
+        }
+    });
+
+    console.log("Setup");
+
+    observer.observe(document.body, { attributeFilter: ["class"] });
 }

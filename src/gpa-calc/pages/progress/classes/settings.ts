@@ -3,6 +3,7 @@ import { getCurrentMarkingPeriod } from "../../../api/marking_period";
 import { ClassType, getClassTypeFromName } from "../../../grades/class_type";
 import { GradePeriod, getNiceNameForGradePeriod } from "../../../grades/exams";
 import { createEl } from "../../../utils/elements";
+import { setModalHeight } from "../../../utils/modal_height";
 import { selectContentEditableElement } from "../../../utils/select";
 import { getSettings, saveSettings } from "../../../utils/settings";
 import { shortenClassName } from "../../../utils/shorten_class";
@@ -346,9 +347,12 @@ export async function renderClassSettings(classId: string) {
 
     const newBody = await getClassSettingsBody(classId, oldText);
     oldBody.replaceWith(newBody);
+
+    setModalHeight();
     closeSettingsBtn.addEventListener("click", () => {
         newBody.replaceWith(oldBody);
         newFooter.replaceWith(oldFooter);
         oldHeaderTextEl.innerHTML = oldText;
+        setModalHeight();
     });
 }
