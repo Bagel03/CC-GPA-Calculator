@@ -15,7 +15,9 @@ export function renderLinks(classId: string) {
             ["pull-right", "cursor-pointer", "ws-nw"],
             `<h6>+ Add Assignment</h6>`
         );
-        el.replaceWith(newDiv);
+        el.hidden = true;
+        el.insertAdjacentElement("beforebegin", newDiv)
+        // el.replaceWith(newDiv);
         // el.children[0].innerHTML = "➕ Add Assignment";
         // el.classList.remove("back-to-top");
         newDiv.addEventListener("click", () => {

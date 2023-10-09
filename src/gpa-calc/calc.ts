@@ -22,7 +22,13 @@ function main() {
                 .then((_) => clearInterval(cancelID))
                 .catch((err) => {
                     alreadyRendered = false;
-                    console.warn("err");
+                    console.warn(err);
+
+                    // Remove anything that was already rendered to prevent double renedering
+                    let elementsToDestroy = document.getElementsByClassName("CC_GPA_INJECTOR");
+                    for(const el of elementsToDestroy) {
+                        el.remove();
+                    }
                 });
             return;
         }
