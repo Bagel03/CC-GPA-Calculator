@@ -18,3 +18,12 @@ export function createEl<T extends keyof HTMLElementTagNameMap>(
     }
     return el;
 }
+
+export function clearAllElements(element: HTMLElement | Document = document) {
+    Array.from(element.getElementsByClassName("CC_GPA_INJECTOR")).forEach(el => el.remove())
+}
+
+
+export function anyElementsPresent(element: HTMLElement | Document = document) {
+    return element.getElementsByClassName("CC_GPA_INJECTOR").length  > 0
+}

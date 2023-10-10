@@ -3,6 +3,7 @@ import { waitForPromiseBar } from "../../../utils/progress_bar.js";
 import { renderLinks } from "./assignments/links.js";
 import { renderResetButton } from "./assignments/reset.js";
 import { renderClassPercentage } from "./percentage.js";
+import { clearAllElements, anyElementsPresent } from "../../../utils/elements.js"
 
 async function renderClassModalAfterFullyLoaded() {
     console.log("Rendering");
@@ -21,11 +22,14 @@ async function renderClassModalAfterFullyLoaded() {
 }
 
 function renderClasses() {
-    console.log("Will render classes when ready....");
+    console.log("Will render classes when ready...");
 
     let alreadyRendered = false;
+    const siteModal = document.getElementById("site-modal")!;
+
     const cancelID = setInterval(() => {
-        if (alreadyRendered) return;
+        if (anyElementsPresent(siteModal)) alreadyRendered = true;
+            if (alreadyRendered) return;
 
         const progresses = document.getElementsByClassName("progress-bar-info");
         if (progresses.length === 0) {
@@ -33,25 +37,21 @@ function renderClasses() {
             renderClassModalAfterFullyLoaded()
                 .then((_) => clearInterval(cancelID))
                 .catch((err) => {
+                    clearAllElements(siteModal);
                     alreadyRendered = false;
                     console.warn(err);
-                    // Remove stuff that was already rendered
-                    for (const el of document.getElementById("site-modal")?.getElementsByClassName("CC_GPA_INJECTOR")) {
-                        el.remove();
-                    }
                 });
             return;
         }
 
         const progressBar = progresses[0] as HTMLDivElement;
         if (progressBar.style.width !== "100%") return;
+        alreadyRendered = true;
+
         renderClassModalAfterFullyLoaded().then(() => clearInterval(cancelID)).catch(err => {
+            clearAllElements(siteModal)
             alreadyRendered = false;
             console.warn(err);
-            // Remove stuff that was already rendered
-            for (const el of document.getElementById("site-modal")?.getElementsByClassName("CC_GPA_INJECTOR")) {
-                el.remove();
-            }
         })
     }, 5);
 }

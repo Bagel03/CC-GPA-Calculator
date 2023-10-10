@@ -1,4 +1,5 @@
 import { renderProgress } from "./pages/progress/progress.js";
+import { clearAllElements, anyElementsPresent} from "./utils/elements.js"
 
 // Check for new update
 const currentVersion = 3.1;
@@ -13,6 +14,8 @@ function main() {
 
     let alreadyRendered = false;
     const cancelID = setInterval(() => {
+        if(anyElementsPresent()) alreadyRendered = true;
+
         if (alreadyRendered) return;
 
         const progresses = document.getElementsByClassName("progress-bar");
@@ -25,10 +28,7 @@ function main() {
                     console.warn(err);
 
                     // Remove anything that was already rendered to prevent double renedering
-                    let elementsToDestroy = document.getElementsByClassName("CC_GPA_INJECTOR");
-                    for (const el of elementsToDestroy) {
-                        el.remove();
-                    }
+                    clearAllElements();
                 });
             return;
         }
@@ -42,10 +42,7 @@ function main() {
             console.warn(err);
 
             // Remove anything that was already rendered to prevent double renedering
-            let elementsToDestroy = document.getElementsByClassName("CC_GPA_INJECTOR");
-            for (const el of elementsToDestroy) {
-                el.remove();
-            }
+            clearAllElements();
         });
 
     }, 5);
