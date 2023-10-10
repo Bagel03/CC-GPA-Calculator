@@ -36,7 +36,7 @@ function renderClasses() {
                     alreadyRendered = false;
                     console.warn("err");
                     // Remove stuff that was already rendered
-                    for(const el of document.getElementById("site-modal")?.querySelectorAll("CC_GPA_INJECTOR")) {
+                    for(const el of document.getElementById("site-modal")?.getElementsByClassName("CC_GPA_INJECTOR")) {
                         el.remove();
                     }
                 });
