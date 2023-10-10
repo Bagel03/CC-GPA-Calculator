@@ -34,9 +34,9 @@ function renderClasses() {
                 .then((_) => clearInterval(cancelID))
                 .catch((err) => {
                     alreadyRendered = false;
-                    console.warn("err");
+                    console.warn(err);
                     // Remove stuff that was already rendered
-                    for(const el of document.getElementById("site-modal")?.getElementsByClassName("CC_GPA_INJECTOR")) {
+                    for (const el of document.getElementById("site-modal")?.getElementsByClassName("CC_GPA_INJECTOR")) {
                         el.remove();
                     }
                 });
@@ -45,8 +45,14 @@ function renderClasses() {
 
         const progressBar = progresses[0] as HTMLDivElement;
         if (progressBar.style.width !== "100%") return;
-        renderClassModalAfterFullyLoaded();
-        clearInterval(cancelID);
+        renderClassModalAfterFullyLoaded().then(() => clearInterval(cancelID)).catch(err => {
+            alreadyRendered = false;
+            console.warn(err);
+            // Remove stuff that was already rendered
+            for (const el of document.getElementById("site-modal")?.getElementsByClassName("CC_GPA_INJECTOR")) {
+                el.remove();
+            }
+        })
     }, 5);
 }
 

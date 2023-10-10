@@ -26,7 +26,7 @@ function main() {
 
                     // Remove anything that was already rendered to prevent double renedering
                     let elementsToDestroy = document.getElementsByClassName("CC_GPA_INJECTOR");
-                    for(const el of elementsToDestroy) {
+                    for (const el of elementsToDestroy) {
                         el.remove();
                     }
                 });
@@ -35,8 +35,19 @@ function main() {
 
         const progressBar = progresses[0] as HTMLDivElement;
         if (progressBar.style.width !== "100%") return;
-        renderProgress();
-        clearInterval(cancelID);
+        alreadyRendered = true;
+
+        renderProgress().then(() => clearInterval(cancelID)).catch((err) => {
+            alreadyRendered = false;
+            console.warn(err);
+
+            // Remove anything that was already rendered to prevent double renedering
+            let elementsToDestroy = document.getElementsByClassName("CC_GPA_INJECTOR");
+            for (const el of elementsToDestroy) {
+                el.remove();
+            }
+        });
+
     }, 5);
 }
 
