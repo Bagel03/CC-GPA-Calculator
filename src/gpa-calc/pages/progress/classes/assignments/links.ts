@@ -1,8 +1,8 @@
 import { createEl } from "../../../../utils/elements.js";
 import { getClassSettingsBody, renderClassSettings } from "../settings.js";
 import { renderNewAssignment } from "./new_assignment.js";
-import { fetchClassInfo } from "../../../api/class_info.js";
-import { getCurrentMarkingPeriod } from "../../../api/marking_period.js";
+import { fetchClassInfo } from "../../../../api/class_info.js";
+import { getCurrentMarkingPeriod } from "../../../../api/marking_period.js";
 
 // Renders the "+ Add assignment links"  and the "change settings"
 export async function renderLinks(classId: string) {
