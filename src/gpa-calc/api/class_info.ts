@@ -8,7 +8,6 @@ export async function fetchClassInfo(classId: string, markingPeriod: string) {
     if (classCache[shortName]) {
         return classCache[shortName]
     }
-    // https://catholiccentral.myschoolapp.com/api/datadirect/GradeBookPerformanceAssignmentStudentList/?sectionId=25477858&markingPeriodId=13370&studentUserId=6746460&personaId=2
     const url = new URL("https://catholiccentral.myschoolapp.com/api/datadirect/GradeBookPerformanceAssignmentStudentList/");
 
     url.searchParams.append("sectionId", classId);

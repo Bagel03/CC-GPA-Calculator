@@ -1,4 +1,5 @@
 import { renderProgress } from "./pages/progress/progress.js";
+import { renderClassPage } from "./pages/class/class.js";
 import { clearAllElements, anyElementsPresent} from "./utils/elements.js"
 
 // Check for new update
@@ -9,8 +10,20 @@ if (!lastVersion || parseFloat(lastVersion) < currentVersion) {
     localStorage.setItem("gpa-calc-last-version", currentVersion.toString());
 }
 
+const pageStringsToRenderers: Record<string, () => Promise<any>> = {
+    progress: renderProgress,
+    academicclass: renderClassPage
+}
+
 function main() {
-    if (!location.href.includes("progress")) return;
+    let renderFn: () => Promise<any>;
+    for(const [key, fn] of Object.entries(pageStringsToRenderers)) {
+        if(location.href.includes(key)) {
+            renderFn = fn;
+            break;
+        }
+    }
+    if(!renderFn) return
 
     let alreadyRendered = false;
     const cancelID = setInterval(() => {
@@ -21,7 +34,7 @@ function main() {
         const progresses = document.getElementsByClassName("progress-bar");
         if (progresses.length === 0) {
             alreadyRendered = true;
-            renderProgress()
+            renderFn()
                 .then((_) => clearInterval(cancelID))
                 .catch((err) => {
                     alreadyRendered = false;
@@ -37,7 +50,7 @@ function main() {
         if (progressBar.style.width !== "100%") return;
         alreadyRendered = true;
 
-        renderProgress().then(() => clearInterval(cancelID)).catch((err) => {
+        renderFn().then(() => clearInterval(cancelID)).catch((err) => {
             alreadyRendered = false;
             console.warn(err);
 

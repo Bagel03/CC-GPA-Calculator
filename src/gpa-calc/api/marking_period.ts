@@ -7,8 +7,6 @@ export async function fetchMarkingPeriods(year?: string, duration?: string) {
     const shortName = year + "-" + duration;
     if (markingPeriodCache[shortName]) return markingPeriodCache[shortName];
 
-    //https://catholiccentral.myschoolapp.com/api/gradebook/GradeBookMyDayMarkingPeriods?durationSectionList=%5B%7B%22DurationId%22%3A142681%2C%22LeadSectionList%22%3A%5B%7B%22LeadSectionId%22%3A25396896%7D%2C%7B%22LeadSectionId%22%3A25454266%7D%2C%7B%22LeadSectionId%22%3A25448038%7D%2C%7B%22LeadSectionId%22%3A25452902%7D%2C%7B%22LeadSectionId%22%3A25463367%7D%2C%7B%22LeadSectionId%22%3A25452350%7D%2C%7B%22LeadSectionId%22%3A25748625%7D%2C%7B%22LeadSectionId%22%3A25388304%7D%5D%7D%2C%7B%22DurationId%22%3A142682%2C%22LeadSectionList%22%3A%5B%7B%22LeadSectionId%22%3A25477858%7D%2C%7B%22LeadSectionId%22%3A25388347%7D%2C%7B%22LeadSectionId%22%3A25454262%7D%2C%7B%22LeadSectionId%22%3A25448070%7D%2C%7B%22LeadSectionId%22%3A25452898%7D%2C%7B%22LeadSectionId%22%3A25463373%7D%2C%7B%22LeadSectionId%22%3A25748626%7D%2C%7B%22LeadSectionId%22%3A25753408%7D%5D%7D%5D&userId=6746460&personaId=2
-
     // durationSectionList [
     //     {
     //         DurationId: 142681,
