@@ -4,6 +4,8 @@ import { fetchContext } from "./context.js";
 const cachedDurations: Record<string, any> = {};
 
 export async function fetchDurations(schoolYear: string = getCurrentSchoolYear()) {
+    // https://catholiccentral.myschoolapp.com/api/DataDirect/StudentGroupTermList/?studentUserId=6746460&schoolYearLabel=2021+-+2022&personaId=2
+
     const userId = (await fetchContext()).UserInfo.UserId;
 
     if (cachedDurations[schoolYear]) {

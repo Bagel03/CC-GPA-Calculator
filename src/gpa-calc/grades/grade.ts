@@ -92,12 +92,10 @@ export class Grade {
             return 0;
         }
 
-        if(formula == GpaFormula.STRAIGHT) return Grade.lettersToGPA[this.letter]
-
         const GPA =
             Grade.lettersToGPA[this.letter] +
             Grade.modifiersToGPA[this.modifier];
-            
+
         if (formula == GpaFormula.UNWEIGHTED) return GPA;
         if (formula == GpaFormula.UNWEIGHTED_NO_A_PLUS) return Math.min(GPA, 4);
 
