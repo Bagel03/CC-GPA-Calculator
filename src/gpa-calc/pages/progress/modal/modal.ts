@@ -1,15 +1,13 @@
 import { fetchClasses } from "../../../api/classes.js";
 import { fetchClassInfo } from "../../../api/class_info.js";
-import {
-    ClassType,
-    getNumberOfClassesOfType,
-} from "../../../grades/class_type.js";
+import { ClassType, getNumberOfClassesOfType } from "../../../grades/class_type.js";
 import { createEl } from "../../../utils/elements.js";
 import { renderFooter } from "./quarter/footer.js";
 import { renderHeader } from "./quarter/header.js";
 import { renderTable } from "./quarter/table.js";
 import { renderQuarterModal } from "./quarter/modal.js";
 import { setModalHeight } from "../../../utils/modal_height.js";
+import { GpaFormula } from "../../../grades/gpa.js";
 
 let siteModal = document.getElementById("site-modal");
 
@@ -25,11 +23,7 @@ export async function renderModal(type: ModalType = ModalType.QUARTER) {
 
     const container = createEl("div", ["modal-dialog", "modal-lg"]);
     siteModal.append(container);
-    const modal = createEl("div", [
-        "modal-content",
-        "gradebook-analysis",
-        "gpa-calc-modal",
-    ]);
+    const modal = createEl("div", ["modal-content", "gradebook-analysis", "gpa-calc-modal"]);
     container.append(modal);
     const head = createEl(
         "div",
@@ -44,7 +38,7 @@ export async function renderModal(type: ModalType = ModalType.QUARTER) {
     modal.append(body);
     body.style.maxHeight = "784px";
     body.append(createEl("br"));
-    const table = await renderTable();
+    const table = await renderTable(GpaFormula.CC);
     body.append(table);
     // <div class="muted" style="margin: -15px 0px 25px 110px;">Graph displays assignments in chronological order by Assigned date.</div>
     // body.append()
@@ -75,11 +69,7 @@ export function openModal() {
     renderModal();
     siteModal.classList.add("modal", "bb-modal", "in");
     siteModal.style.display = "block";
-    document.body.classList.add(
-        "modal-open",
-        "overflow-none",
-        "gpa-calc-modal-open"
-    );
+    document.body.classList.add("modal-open", "overflow-none", "gpa-calc-modal-open");
     document.body.append(
         createEl("div", ["modal-backdrop", "in"], "", {
             id: "GpaModalBackdrop",
@@ -94,11 +84,7 @@ export function closeModal() {
 
     siteModal.classList.remove("modal", "bb-modal", "in");
     siteModal.style.display = "none";
-    document.body.classList.remove(
-        "modal-open",
-        "overflow-none",
-        "gpa-calc-modal-open"
-    );
+    document.body.classList.remove("modal-open", "overflow-none", "gpa-calc-modal-open");
 
     document.getElementById("GpaModalBackdrop").remove();
     window.removeEventListener("keydown", escapeHandler);

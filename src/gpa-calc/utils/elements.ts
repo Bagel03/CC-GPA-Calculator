@@ -1,4 +1,3 @@
-
 export function createEl<T extends keyof HTMLElementTagNameMap>(
     tag: T,
     classes: string[] = [],
@@ -20,10 +19,11 @@ export function createEl<T extends keyof HTMLElementTagNameMap>(
 }
 
 export function clearAllElements(element: HTMLElement | Document = document) {
-    Array.from(element.getElementsByClassName("CC_GPA_INJECTOR")).forEach(el => el.remove())
+    Array.from(element.getElementsByClassName("CC_GPA_INJECTOR")).forEach(el => el.remove());
 }
 
-
 export function anyElementsPresent(element: HTMLElement | Document = document) {
-    return element.getElementsByClassName("CC_GPA_INJECTOR").length  > 0
+    // for some reason the tooltip seems to be weird
+    const elements = Array.from(element.getElementsByClassName("CC_GPA_INJECTOR"));
+    return elements.filter(e => !e.classList.contains("tooltip")).length > 0;
 }

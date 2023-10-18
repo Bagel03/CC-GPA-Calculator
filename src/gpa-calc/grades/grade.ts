@@ -59,9 +59,9 @@ export class Grade {
     ];
 
     public static readonly modifiersToGPA: Record<GradeModifier, number> = {
-        [GradeModifier.PLUS]: 0.33,
+        [GradeModifier.PLUS]: 0.333,
         [GradeModifier.NONE]: 0,
-        [GradeModifier.MINUS]: -0.33,
+        [GradeModifier.MINUS]: -0.333, // Should this be -.333 (A- = 3.667) or -.334 (A- = 3.666)?
     };
 
     public readonly letter: LetterGrade;
@@ -75,37 +75,10 @@ export class Grade {
             this.letter = LetterGrade.A;
             this.modifier = GradeModifier.PLUS;
         } else {
-            this.letter = Grade.lettersToGrades.find(
-                ([grade, num]) => Math.round(this.percentage) >= num
-            )[0];
+            this.letter = Grade.lettersToGrades.find(([grade, num]) => Math.round(this.percentage) >= num)[0];
             this.modifier = Grade.modifiersToGrades.find(
                 ([grade, num]) => Math.round(this.percentage) % 10 >= num
             )[0];
-        }
-    }
-
-    getGPA(classType: ClassType, formula: GpaFormula = GpaFormula.CC) {
-        if (classType == ClassType.UNMARKED) {
-            console.warn(
-                "Tried to get the GPA of a uncounted course. This might give an incorrect average GPA"
-            );
-            return 0;
-        }
-
-        const GPA =
-            Grade.lettersToGPA[this.letter] +
-            Grade.modifiersToGPA[this.modifier];
-
-        if (formula == GpaFormula.UNWEIGHTED) return GPA;
-        if (formula == GpaFormula.UNWEIGHTED_NO_A_PLUS) return Math.min(GPA, 4);
-
-        switch (classType) {
-            case ClassType.HONORS:
-            case ClassType.AP:
-                return GPA + 1;
-
-            case ClassType.REGULAR:
-                return GPA;
         }
     }
 
