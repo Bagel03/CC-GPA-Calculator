@@ -3,15 +3,11 @@ import { waitForPromiseBar } from "../../../utils/progress_bar.js";
 import { renderLinks } from "./assignments/links.js";
 import { renderResetButton } from "./assignments/reset.js";
 import { renderClassPercentage } from "./percentage.js";
+import { clearAllElements, anyElementsPresent } from "../../../utils/elements.js";
 
 async function renderClassModalAfterFullyLoaded() {
-    console.log("Rendering");
-    const name =
-        document.getElementsByClassName("modal-header")[0].children[1]
-            .innerHTML;
-    const currentClass = await fetchClasses().then((res) =>
-        res.find((c) => c.sectionidentifier == name)
-    );
+    const name = document.getElementsByClassName("modal-header")[0].children[1].innerHTML;
+    const currentClass = await fetchClasses().then(res => res.find(c => c.sectionidentifier == name));
 
     await Promise.all([
         renderClassPercentage(currentClass.sectionid),
@@ -25,18 +21,22 @@ function renderClasses() {
 
     let alreadyRendered = false;
     const cancelID = setInterval(() => {
+        if (anyElementsPresent(siteModal)) alreadyRendered = true;
         if (alreadyRendered) return;
 
         const progresses = document.getElementsByClassName("progress-bar-info");
         if (progresses.length === 0) {
             alreadyRendered = true;
             renderClassModalAfterFullyLoaded()
-                .then((_) => clearInterval(cancelID))
-                .catch((err) => {
+                .then(_ => clearInterval(cancelID))
+                .catch(err => {
+                    clearAllElements(siteModal);
                     alreadyRendered = false;
                     console.warn("err");
                     // Remove stuff that was already rendered
-                    for(const el of document.getElementById("site-modal")?.querySelectorAll("CC_GPA_INJECTOR")) {
+                    for (const el of document
+                        .getElementById("site-modal")
+                        ?.querySelectorAll("CC_GPA_INJECTOR")) {
                         el.remove();
                     }
                 });
@@ -45,19 +45,23 @@ function renderClasses() {
 
         const progressBar = progresses[0] as HTMLDivElement;
         if (progressBar.style.width !== "100%") return;
-        renderClassModalAfterFullyLoaded();
-        clearInterval(cancelID);
+        alreadyRendered = true;
+
+        renderClassModalAfterFullyLoaded()
+            .then(() => clearInterval(cancelID))
+            .catch(err => {
+                clearAllElements(siteModal);
+                alreadyRendered = false;
+                console.warn(err);
+            });
     }, 5);
 }
 
 export function setupObserverToRenderClasses() {
     let currentlyRendered = false;
-    const observer = new MutationObserver((ev) => {
+    const observer = new MutationObserver(ev => {
         const { classList } = document.body;
-        if (
-            !classList.contains("modal-open") ||
-            classList.contains("gpa-calc-modal-open")
-        ) {
+        if (!classList.contains("modal-open") || classList.contains("gpa-calc-modal-open")) {
             currentlyRendered = false;
             return;
         }
@@ -67,8 +71,6 @@ export function setupObserverToRenderClasses() {
             currentlyRendered = true;
         }
     });
-
-    console.log("Setup");
 
     observer.observe(document.body, { attributeFilter: ["class"] });
 }

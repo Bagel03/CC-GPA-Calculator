@@ -1,5 +1,11 @@
+/** Given the 2 quater grades and the exam, calculate the semeter grade */
 export function getOverallGrade(q1: number, q2: number, exam: number) {
     return 0.4 * q1 + 0.4 * q2 + 0.2 * exam;
+}
+
+/** Given the 2 quater grades calculate the semeter grade. Use for things like 2nd semester AP / senior classes */
+export function getOverallGradeNoExams(q1: number, q2: number) {
+    return (q1+q2) /2
 }
 
 export function getExamGradeForOverall(
@@ -10,6 +16,7 @@ export function getExamGradeForOverall(
     const totalQuarter = q1 * 0.4 + q2 * 0.4;
     return (overall - totalQuarter) / 0.2;
 }
+
 
 export const GradePeriod = {
     Q1: "0",

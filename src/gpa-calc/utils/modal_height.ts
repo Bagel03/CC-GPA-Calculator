@@ -20,6 +20,8 @@ export function setModalHeight() {
     const body = document.querySelector<HTMLDivElement>(".modal-body");
     const footer = document.querySelector<HTMLDivElement>(".modal-footer");
 
+    if (!body || !header || !footer) return;
+
     const top = body.scrollTop;
 
     const height =

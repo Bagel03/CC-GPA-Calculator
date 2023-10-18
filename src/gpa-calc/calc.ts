@@ -1,4 +1,6 @@
-import { renderProgress } from "./pages/progress/progress.js";
+import { renderClassPage } from "./pages/class/class.js";
+import { renderProgressPage } from "./pages/progress/progress.js";
+import { clearAllElements, anyElementsPresent } from "./utils/elements.js";
 
 // Check for new update
 const currentVersion = 3.1;
@@ -8,36 +10,95 @@ if (!lastVersion || parseFloat(lastVersion) < currentVersion) {
     localStorage.setItem("gpa-calc-last-version", currentVersion.toString());
 }
 
+const pageStringsToRenderers: Record<string, () => Promise<any>> = {
+    progress: renderProgressPage,
+    academicclass: renderClassPage,
+};
+
 function main() {
-    if (!location.href.includes("progress")) return;
+    let renderFn: () => Promise<any>;
+    for (const [key, fn] of Object.entries(pageStringsToRenderers)) {
+        if (location.href.includes(key)) {
+            renderFn = fn;
+            break;
+        }
+    }
+
+    if (!renderFn) return;
 
     let alreadyRendered = false;
     const cancelID = setInterval(() => {
-        if (alreadyRendered) return;
-
-        const progresses = document.getElementsByClassName("progress-bar");
-        if (progresses.length === 0) {
+        if (anyElementsPresent()) {
             alreadyRendered = true;
-            renderProgress()
-                .then((_) => clearInterval(cancelID))
-                .catch((err) => {
-                    alreadyRendered = false;
-                    console.warn(err);
-
-                    // Remove anything that was already rendered to prevent double renedering
-                    let elementsToDestroy = document.getElementsByClassName("CC_GPA_INJECTOR");
-                    for(const el of elementsToDestroy) {
-                        el.remove();
-                    }
-                });
-            return;
         }
 
-        const progressBar = progresses[0] as HTMLDivElement;
-        if (progressBar.style.width !== "100%") return;
-        renderProgress();
+        if (alreadyRendered) return;
+        alreadyRendered = true;
+
+        renderFn()
+            .then(() => {
+                clearInterval(cancelID);
+                alreadyRendered = false;
+            })
+            .catch(() => {
+                clearAllElements();
+                alreadyRendered = false;
+            });
+    }, 50);
+    // const cancelID = setInterval(() => {
+    //     console.log(alreadyRendered, cancelID);
+    //     if (anyElementsPresent()) {
+    //         alreadyRendered = true;
+    //     }
+
+    //     if (alreadyRendered) return;
+
+    //     const progresses = document.getElementsByClassName("progress-bar");
+    //     if (progresses.length === 0) {
+    //         alreadyRendered = true;
+    //         renderFn()
+    //             .then(_ => {
+    //                 console.log("Canceling");
+    //                 if (!anyElementsPresent()) console.log("Canceling with no elements present");
+    //                 clearInterval(cancelID);
+    //             })
+    //             .catch(err => {
+    //                 alreadyRendered = false;
+    //                 console.warn(err);
+
+    //                 // Remove anything that was already rendered to prevent double renedering
+    //                 clearAllElements();
+    //             });
+    //         return;
+    //     }
+
+    //     const progressBar = progresses[0] as HTMLDivElement;
+    //     if (progressBar.style.width !== "100%") return;
+    //     alreadyRendered = true;
+
+    //     renderFn()
+    //         .then(() => {
+    //             console.log("Canceling");
+    //             if (!anyElementsPresent()) console.log("Canceling with no elements present");
+
+    //             clearInterval(cancelID);
+    //         })
+    //         .catch(err => {
+    //             alreadyRendered = false;
+    //             console.warn(err);
+
+    //             // Remove anything that was already rendered to prevent double renedering
+    //             clearAllElements();
+    //         });
+    // }, 5);
+
+    function cancelIntervalOnHashChange() {
+        alreadyRendered = false;
+
         clearInterval(cancelID);
-    }, 5);
+        window.removeEventListener("hashchange", cancelIntervalOnHashChange);
+    }
+    window.addEventListener("hashchange", cancelIntervalOnHashChange);
 }
 
 main();
