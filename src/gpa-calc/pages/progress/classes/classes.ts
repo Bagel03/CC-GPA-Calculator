@@ -17,14 +17,16 @@ async function renderClassModalAfterFullyLoaded() {
 }
 
 function renderClasses() {
-    console.log("Will render classes when ready....");
+    console.log("Will render classes when ready...");
 
     let alreadyRendered = false;
+    const siteModal = document.getElementById("site-modal")!;
+
     const cancelID = setInterval(() => {
-        // console.log("hi");
         const siteModal = document.getElementById("site-modal");
         if (anyElementsPresent(siteModal)) alreadyRendered = true;
         if (alreadyRendered) return;
+
 
         const progresses = document.getElementsByClassName("progress-bar-info");
         if (progresses.length === 0) {
@@ -41,6 +43,7 @@ function renderClasses() {
                     //     ?.querySelectorAll("CC_GPA_INJECTOR")) {
                     //     el.remove();
                     // }
+
                 });
             return;
         }
