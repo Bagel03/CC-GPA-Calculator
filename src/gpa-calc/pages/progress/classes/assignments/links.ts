@@ -1,7 +1,7 @@
 import { createEl } from "../../../../utils/elements.js";
 import { getClassSettingsBody, renderClassSettings } from "../settings.js";
 import { renderNewAssignment } from "./new_assignment.js";
-import { fetchClassInfo } from "../../../../api/class_info.js";
+import { fetchAssignments } from "../../../../api/assignments.js";
 import { getCurrentMarkingPeriod } from "../../../../api/marking_period.js";
 
 // Renders the "+ Add assignment links"  and the "change settings"
@@ -12,7 +12,7 @@ export async function renderLinks(classId: string) {
 
     // Make sure all the elements are already loaded
     // If not, throw an erorr which will reset all the rest of the elements 
-    const classData = await fetchClassInfo(
+    const classData = await fetchAssignments(
         classId,
         await getCurrentMarkingPeriod()
     );
