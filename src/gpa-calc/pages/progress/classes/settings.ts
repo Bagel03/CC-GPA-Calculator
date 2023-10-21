@@ -1,4 +1,4 @@
-import { fetchClassInfo } from "../../../api/class_info";
+import { fetchAssignments } from "../../../api/assignments";
 import { getCurrentMarkingPeriod } from "../../../api/marking_period";
 import { ClassType } from "../../../grades/class_type";
 import { GradePeriod, getNiceNameForGradePeriod } from "../../../grades/exams";
@@ -11,11 +11,21 @@ import { addToolTip } from "../../../utils/tooltip";
 import { TOTAL_POINTS, WEIGHTED, getSectionWeightsAndInfo } from "./weights";
 
 export async function getClassSettingsBody(classID: string, className: string) {
-    const sectionInfo = await getSectionWeightsAndInfo(classID);
-    const classInfo = await fetchClassInfo(classID, await getCurrentMarkingPeriod());
+    const classSettings = (getSettings().classes[classID] ??= {
+        sectionInfo: {},
+        type: ClassType.fromName(className).id,
+        gradeFormula: TOTAL_POINTS,
+    });
 
-    const classSettings = getSettings().classes[classID];
-    classSettings.type ??= ClassType.fromName(className);
+    const sectionInfo = (await getSectionWeightsAndInfo(classID)) || {
+        weights: TOTAL_POINTS,
+        droppedAssignments: {},
+        extraCreditAssignments: {},
+    };
+    const classInfo = await fetchAssignments(classID, await getCurrentMarkingPeriod());
+
+    classSettings.type = ClassType.fromName(className).id;
+    classSettings.sectionInfo ??= {};
 
     const isTotalPoints = sectionInfo.weights === TOTAL_POINTS;
     classSettings.gradeFormula ??= isTotalPoints ? TOTAL_POINTS : WEIGHTED;
@@ -54,20 +64,15 @@ export async function getClassSettingsBody(classID: string, className: string) {
     const classTypeDropdown = createEl(
         "ul",
         ["dropdown-menu"],
-        `
+        ClassType.types
+            .map(
+                c => `
             <li>
-                <a data-class-type="${ClassType.REGULAR}">Regular</a>
-            </li>           
-            <li>
-                <a data-class-type="${ClassType.HONORS}">Honors</a>
-            </li>
-            <li>
-                <a data-class-type="${ClassType.AP}">A.P.</a>
-            </li>
-            <li>
-                <a data-class-type="${ClassType.UNMARKED}">Uncounted</a>
+                <a data-class-type="${c.id}">${c.name}</a>
             </li>
         `
+            )
+            .join("")
     );
 
     const correctClassTypeLink = classTypeDropdown.querySelector(`[data-class-type="${classSettings.type}"]`);
@@ -130,7 +135,7 @@ export async function getClassSettingsBody(classID: string, className: string) {
 
     classTypeDropdown.querySelectorAll("a").forEach(link =>
         link.addEventListener("click", function () {
-            classSettings.type = ClassType.getById(parseInt(link.dataset.classType)); //parseInt(link.dataset.classType) as ClassType;
+            classSettings.type = ClassType.getById(parseInt(link.dataset.classType)).id; //parseInt(link.dataset.classType) as ClassType;
         })
     );
 
@@ -166,7 +171,7 @@ export async function getClassSettingsBody(classID: string, className: string) {
 
         for (const sectionId of Object.keys(sectionInfo.droppedAssignments)) {
             const sectionName: string = classInfo.find(
-                assignment => assignment.AssignmentTypeId == sectionId
+                assignment => assignment.AssignmentTypeId.toString() == sectionId
             ).AssignmentType;
 
             const row = createEl("tr");

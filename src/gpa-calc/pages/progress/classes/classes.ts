@@ -10,9 +10,9 @@ async function renderClassModalAfterFullyLoaded() {
     const currentClass = await fetchClasses().then(res => res.find(c => c.sectionidentifier == name));
 
     await Promise.all([
-        renderClassPercentage(currentClass.sectionid),
+        renderClassPercentage(currentClass.sectionid.toString()),
         renderResetButton(),
-        renderLinks(currentClass.sectionid),
+        renderLinks(currentClass.sectionid.toString()),
     ]);
 }
 
@@ -21,6 +21,8 @@ function renderClasses() {
 
     let alreadyRendered = false;
     const cancelID = setInterval(() => {
+        // console.log("hi");
+        const siteModal = document.getElementById("site-modal");
         if (anyElementsPresent(siteModal)) alreadyRendered = true;
         if (alreadyRendered) return;
 
@@ -34,11 +36,11 @@ function renderClasses() {
                     alreadyRendered = false;
                     console.warn("err");
                     // Remove stuff that was already rendered
-                    for (const el of document
-                        .getElementById("site-modal")
-                        ?.querySelectorAll("CC_GPA_INJECTOR")) {
-                        el.remove();
-                    }
+                    // for (const el of document
+                    //     .getElementById("site-modal")
+                    //     ?.querySelectorAll("CC_GPA_INJECTOR")) {
+                    //     el.remove();
+                    // }
                 });
             return;
         }
@@ -57,7 +59,10 @@ function renderClasses() {
     }, 5);
 }
 
+let observerIsAlreadySetUp = false;
 export function setupObserverToRenderClasses() {
+    if (observerIsAlreadySetUp) return;
+
     let currentlyRendered = false;
     const observer = new MutationObserver(ev => {
         const { classList } = document.body;
@@ -73,4 +78,5 @@ export function setupObserverToRenderClasses() {
     });
 
     observer.observe(document.body, { attributeFilter: ["class"] });
+    observerIsAlreadySetUp = true;
 }

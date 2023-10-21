@@ -1,6 +1,7 @@
 import { renderClassPage } from "./pages/class/class.js";
 import { renderProgressPage } from "./pages/progress/progress.js";
 import { clearAllElements, anyElementsPresent } from "./utils/elements.js";
+import "./utils/polyfills.js";
 
 // Check for new update
 const currentVersion = 3.1;

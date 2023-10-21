@@ -1,5 +1,5 @@
 import { fetchClasses } from "../../../api/classes.js";
-import { fetchClassInfo } from "../../../api/class_info.js";
+import { fetchAssignments } from "../../../api/assignments.js";
 import { fetchMarkingPeriods, getCurrentMarkingPeriod } from "../../../api/marking_period.js";
 import { ClassType, getNumberOfClassesOfType } from "../../../grades/class_type.js";
 import { getExamGradeForOverall, getOverallGrade, GradePeriod } from "../../../grades/exams.js";
@@ -39,8 +39,8 @@ export async function renderExamTable(year?: string, duration?: string) {
     await Promise.all(
         classes.map(async c => {
             const markingPeriods = await fetchMarkingPeriods(year, duration);
-            const q1info = await fetchClassInfo(c.sectionid, markingPeriods[0].MarkingPeriodId);
-            const q2info = await fetchClassInfo(c.sectionid, markingPeriods[1].MarkingPeriodId);
+            const q1info = await fetchAssignments(c.sectionid, markingPeriods[0].MarkingPeriodId);
+            const q2info = await fetchAssignments(c.sectionid, markingPeriods[1].MarkingPeriodId);
 
             let q1GradeString = q1info[0]?.SectionGrade;
             let q2GradeString = q2info[0]?.SectionGrade;
