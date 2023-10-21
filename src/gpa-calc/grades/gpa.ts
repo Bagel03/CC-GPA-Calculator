@@ -1,56 +1,100 @@
-import { ClassType, getClassTypeFromName } from "./class_type.js";
+import { ClassType } from "./class_type.js";
 import { Grade } from "./grade.js";
 
-export const GpaFormula = {
-    CC: 0,
-    UNWEIGHTED: 1,
-    UNWEIGHTED_NO_A_PLUS: 2,
-} as const;
-export type GpaFormula = (typeof GpaFormula)[keyof typeof GpaFormula];
+export type GpaFormulaFunc = (grade: Grade, type: ClassType) => number;
 
-export function getNameForGpaFormula(formula: GpaFormula) {
-    switch (formula) {
-        case GpaFormula.CC:
-            return "CC Weighted";
-        case GpaFormula.UNWEIGHTED:
-            return "Unweighted";
-        case GpaFormula.UNWEIGHTED_NO_A_PLUS:
-            return "Unweighted (No A+)";
+export class GpaFormula {
+    public static readonly allFormulas: GpaFormula[] = [];
+    static getById(id: number): GpaFormula {
+        return this.allFormulas.find(formula => formula.id === id)!;
     }
-}
 
-export function getAverageGPA(
-    classes: any[],
-    formula: GpaFormula = GpaFormula.CC
-) {
-    let grades = classes
-        .filter((c) => c.cumgrade !== null)
-        .map((c) => ({
-            grade: new Grade(c.cumgrade),
-            name: c.sectionidentifier as string,
-        }));
+    private static nextId: number = 0;
+    public readonly id: number;
+    private constructor(
+        public readonly name: string,
+        public readonly ignoredClasses: ClassType[],
+        private readonly func: GpaFormulaFunc
+    ) {
+        this.id = GpaFormula.nextId++;
+        GpaFormula.allFormulas.push(this);
+    }
 
-    grades = grades.filter(
-        (g) => getClassTypeFromName(g.name) != ClassType.UNMARKED
-    );
+    processesType(type: ClassType) {
+        return !this.ignoredClasses.includes(type);
+    }
 
-    return (
-        grades.reduce((accum, curr) => {
-            return (
-                accum +
-                curr.grade.getGPA(getClassTypeFromName(curr.name), formula)
+    calc(grade: Grade, classType: ClassType) {
+        if (!this.processesType(classType)) {
+            console.warn(
+                "Tried to get the grade of a",
+                classType.name,
+                "class using the",
+                this.name,
+                "gpa formula. This formula ignores these kind of classes, and this may result in an incorrect GPA calculation"
             );
-        }, 0) / grades.length
-    );
-}
+            return 0;
+        }
 
-export function getAverageGPAFromRawData(
-    rawData: { grade: Grade; classType: ClassType }[],
-    formula: GpaFormula
-) {
-    return (
-        rawData.reduce((accum, curr) => {
-            return accum + curr.grade.getGPA(curr.classType, formula);
-        }, 0) / rawData.length
+        return this.func(grade, classType);
+    }
+
+    getAverageGPA(classes: { grade: Grade; classType: ClassType }[]) {
+        classes = classes.filter(c => this.processesType(c.classType));
+        return (
+            classes.reduce((prev, curr) => prev + this.calc(curr.grade, curr.classType), 0) / classes.length
+        );
+    }
+
+    getAverageGPAFromRawData(classes: any[]) {
+        classes = classes.filter(c => c.cumgrade !== null);
+        if (classes.length === 0) return NaN;
+        return this.getAverageGPA(
+            classes.map(c => ({
+                classType: ClassType.fromName(c.sectionidentifier),
+                grade: new Grade(c.cumgrade),
+            }))
+        );
+    }
+
+    public static readonly CC = new GpaFormula(
+        "CC Weighting",
+        [ClassType.UNMARKED],
+        (grade, type) => GpaFormula.UNWEIGHTED.func(grade, type) + (type.extraHonorsPoint ? 1 : 0)
+    );
+
+    public static readonly UNWEIGHTED = new GpaFormula(
+        "Unweighted - 4.33",
+        [ClassType.UNMARKED],
+        (grade, type) => Grade.lettersToGPA[grade.letter] + Grade.modifiersToGPA[grade.modifier]
+    );
+
+    public static readonly UNWEIGHTED_NO_A_PLUS = new GpaFormula(
+        "Unweighted - 4.0",
+        [ClassType.UNMARKED],
+        (grade, type) => Math.min(4, GpaFormula.UNWEIGHTED.func(grade, type))
+    );
+
+    public static readonly STRAIGHT = new GpaFormula(
+        "Straight Letter",
+        [ClassType.UNMARKED],
+        (grade, type) => Grade.lettersToGPA[grade.letter]
+    );
+
+    // No theology
+    public static readonly UNWEIGHTED_NO_THEOLOGY = new GpaFormula(
+        "Unweighted - 4.33 (No Theology)",
+        [ClassType.UNMARKED, ClassType.THEOLOGY],
+        GpaFormula.UNWEIGHTED.func
+    );
+    public static readonly STRAIGHT_NO_A_PLUS_NO_THEOLOGY = new GpaFormula(
+        "Unweighted - 4.0 (No Theology)",
+        [ClassType.UNMARKED, ClassType.THEOLOGY],
+        GpaFormula.UNWEIGHTED_NO_A_PLUS.func
+    );
+    public static readonly STRAIGHT_NO_THEOLOGY = new GpaFormula(
+        "Straight Letter (No Theology)",
+        [ClassType.UNMARKED, ClassType.THEOLOGY],
+        GpaFormula.STRAIGHT.func
     );
 }

@@ -1,40 +1,70 @@
-export const ClassType = {
-    REGULAR: 0,
-    HONORS: 1,
-    AP: 2,
-    UNMARKED: 3,
-} as const;
-export type ClassType = (typeof ClassType)[keyof typeof ClassType];
+export class ClassType {
+    private static readonly allClassTypes: ClassType[] = [];
+    static getById(id: string | number) {
+        return this.allClassTypes.find(c => c.id == id);
+    }
 
-const IGNORED = ["physical education", "study hall", "hr", "quiz bowl"];
-export function getClassTypeFromName(name: string) {
-    const words = name.toLowerCase().split(" ");
+    private static nextId: number = 0;
+    public readonly id: number;
 
-    if (IGNORED.some((i) => name.toLowerCase().includes(i)))
-        return ClassType.UNMARKED;
+    constructor(
+        public readonly name: string,
+        // Used for whole class names
+        public readonly identifyingStrings: string[] = [],
+        public readonly identifyingWords: string[] = [],
+        public readonly extraHonorsPoint: boolean = false
+    ) {
+        this.id = ClassType.nextId++;
+        ClassType.allClassTypes.push(this);
+    }
 
-    if (words.includes("ap")) return ClassType.AP;
-    if (words.includes("honors")) return ClassType.HONORS;
-    return ClassType.REGULAR;
-}
+    public static readonly REGULAR = new ClassType("Regular");
+    public static readonly HONORS = new ClassType("Honors", [], ["honors"], true);
+    public static readonly AP = new ClassType("AP", [], ["ap"], true);
+    public static readonly UNMARKED = new ClassType(
+        "Unmarked",
+        ["physical education", "study hall", "quiz bowl"],
+        ["hr"]
+    );
+    public static readonly THEOLOGY = new ClassType("Theology", [
+        "theology",
+        "revelation",
+        "chistology",
+        "paschal mystery",
+        "ecclesiology" /* ... todo */,
+    ]);
 
-export function getClassTypeName(type: ClassType) {
-    switch (type) {
-        case ClassType.AP:
-            return "AP";
-        case ClassType.HONORS:
-            return "Honors";
-        case ClassType.REGULAR:
-            return "Regular";
-        case ClassType.UNMARKED:
-            return "Unmarked";
+    public static readonly types = [
+        ClassType.REGULAR,
+        ClassType.HONORS,
+        ClassType.AP,
+        ClassType.UNMARKED,
+        ClassType.THEOLOGY,
+    ];
+
+    public static fromName(name: string): ClassType {
+        name = name.toLowerCase();
+        const wordsInName = name.split(/\W/);
+
+        for (const type of ClassType.types) {
+            if (type.identifyingStrings.some(string => name.includes(string))) return type;
+            if (type.identifyingWords.some(word => wordsInName.includes(word))) return type;
+        }
+
+        return ClassType.REGULAR;
     }
 }
 
+// export const ClassType = {
+//     REGULAR: 0,
+//     HONORS: 1,
+//     AP: 2,
+//     UNMARKED: 3,
+// } as const;
+// export type ClassType = (typeof ClassType)[keyof typeof ClassType];
+
 export function getClassesOfType(classes: any[], type: ClassType): any[] {
-    return classes.filter(
-        (c) => getClassTypeFromName(c.sectionidentifier) == type
-    );
+    return classes.filter(c => ClassType.fromName(c.sectionidentifier) == type);
 }
 
 export function getNumberOfClassesOfType(classes: any[], type: ClassType) {

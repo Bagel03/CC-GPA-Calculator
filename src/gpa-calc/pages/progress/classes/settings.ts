@@ -1,6 +1,6 @@
-import { fetchClassInfo } from "../../../api/class_info";
+import { fetchAssignments } from "../../../api/assignments";
 import { getCurrentMarkingPeriod } from "../../../api/marking_period";
-import { ClassType, getClassTypeFromName } from "../../../grades/class_type";
+import { ClassType } from "../../../grades/class_type";
 import { GradePeriod, getNiceNameForGradePeriod } from "../../../grades/exams";
 import { createEl } from "../../../utils/elements";
 import { setModalHeight } from "../../../utils/modal_height";
@@ -11,31 +11,28 @@ import { addToolTip } from "../../../utils/tooltip";
 import { TOTAL_POINTS, WEIGHTED, getSectionWeightsAndInfo } from "./weights";
 
 export async function getClassSettingsBody(classID: string, className: string) {
-    const sectionInfo = await getSectionWeightsAndInfo(classID);
-    const classInfo = await fetchClassInfo(
-        classID,
-        await getCurrentMarkingPeriod()
-    );
+    const classSettings = (getSettings().classes[classID] ??= {
+        sectionInfo: {},
+        type: ClassType.fromName(className).id,
+        gradeFormula: TOTAL_POINTS,
+    });
 
-    const classSettings = getSettings().classes[classID];
-    classSettings.type ??= getClassTypeFromName(className);
+    const sectionInfo = (await getSectionWeightsAndInfo(classID)) || {
+        weights: TOTAL_POINTS,
+        droppedAssignments: {},
+        extraCreditAssignments: {},
+    };
+    const classInfo = await fetchAssignments(classID, await getCurrentMarkingPeriod());
+
+    classSettings.type = ClassType.fromName(className).id;
+    classSettings.sectionInfo ??= {};
 
     const isTotalPoints = sectionInfo.weights === TOTAL_POINTS;
     classSettings.gradeFormula ??= isTotalPoints ? TOTAL_POINTS : WEIGHTED;
 
-    const body = createEl(
-        "div",
-        ["modal-body"],
-        "",
-        {},
-        { overflowY: "scroll" }
-    );
+    const body = createEl("div", ["modal-body"], "", {}, { overflowY: "scroll" });
 
-    const sectionTitle = createEl(
-        "div",
-        [],
-        `<h1 style="margin-top: 0">${shortenClassName(className)}</h1>`
-    );
+    const sectionTitle = createEl("div", [], `<h1 style="margin-top: 0">${shortenClassName(className)}</h1>`);
     const hr = createEl("hr", ["margin-5"]);
     body.append(sectionTitle, hr);
 
@@ -67,25 +64,18 @@ export async function getClassSettingsBody(classID: string, className: string) {
     const classTypeDropdown = createEl(
         "ul",
         ["dropdown-menu"],
-        `
+        ClassType.types
+            .map(
+                c => `
             <li>
-                <a data-class-type="${ClassType.REGULAR}">Regular</a>
-            </li>           
-            <li>
-                <a data-class-type="${ClassType.HONORS}">Honors</a>
-            </li>
-            <li>
-                <a data-class-type="${ClassType.AP}">A.P.</a>
-            </li>
-            <li>
-                <a data-class-type="${ClassType.UNMARKED}">Uncounted</a>
+                <a data-class-type="${c.id}">${c.name}</a>
             </li>
         `
+            )
+            .join("")
     );
 
-    const correctClassTypeLink = classTypeDropdown.querySelector(
-        `[data-class-type="${classSettings.type}"]`
-    );
+    const correctClassTypeLink = classTypeDropdown.querySelector(`[data-class-type="${classSettings.type}"]`);
     correctClassTypeLink.classList.add("active");
     changeClassTypeBtn.innerHTML = `${correctClassTypeLink.innerHTML} <span class="caret"></span>`;
 
@@ -104,9 +94,7 @@ export async function getClassSettingsBody(classID: string, className: string) {
     const changeGradingSystemBtn = createEl(
         "button",
         ["btn", "btn-default", "dropdown-toggle"],
-        `${
-            isTotalPoints ? "Total Points" : "Weighted"
-        } <span class="caret"></span>`,
+        `${isTotalPoints ? "Total Points" : "Weighted"} <span class="caret"></span>`,
         { "data-toggle": "dropdown" },
         { width: "120px" }
     );
@@ -130,16 +118,13 @@ export async function getClassSettingsBody(classID: string, className: string) {
         { padding: "0", margin: "15px" }
     );
 
-    gradingSystemDropdownGroup.append(
-        gradingSystemDropdown,
-        changeGradingSystemBtn
-    );
+    gradingSystemDropdownGroup.append(gradingSystemDropdown, changeGradingSystemBtn);
 
     gradingSystemRow.append(gradingSystemDropdownGroup);
     body.append(classTypeRow, gradingSystemRow);
 
-    [classTypeDropdown, gradingSystemDropdown].forEach((dropdown) => {
-        dropdown.querySelectorAll("a").forEach((link) => {
+    [classTypeDropdown, gradingSystemDropdown].forEach(dropdown => {
+        dropdown.querySelectorAll("a").forEach(link => {
             link.addEventListener("click", function () {
                 dropdown.querySelector(".active").classList.remove("active");
                 this.parentElement.classList.add("active");
@@ -148,17 +133,15 @@ export async function getClassSettingsBody(classID: string, className: string) {
         });
     });
 
-    classTypeDropdown.querySelectorAll("a").forEach((link) =>
+    classTypeDropdown.querySelectorAll("a").forEach(link =>
         link.addEventListener("click", function () {
-            classSettings.type = parseInt(link.dataset.classType) as ClassType;
+            classSettings.type = ClassType.getById(parseInt(link.dataset.classType)).id; //parseInt(link.dataset.classType) as ClassType;
         })
     );
 
-    gradingSystemDropdown.querySelectorAll("a").forEach((link) =>
+    gradingSystemDropdown.querySelectorAll("a").forEach(link =>
         link.addEventListener("click", function () {
-            classSettings.gradeFormula = link.dataset.gradingFormula as
-                | TOTAL_POINTS
-                | WEIGHTED;
+            classSettings.gradeFormula = link.dataset.gradingFormula as TOTAL_POINTS | WEIGHTED;
         })
     );
 
@@ -168,12 +151,7 @@ export async function getClassSettingsBody(classID: string, className: string) {
         body.append(categoriesTitle);
         const table = createEl(
             "table",
-            [
-                "table",
-                "table-striped",
-                "table-condensed",
-                "table-mobile-stacked",
-            ],
+            ["table", "table-striped", "table-condensed", "table-mobile-stacked"],
             ""
         );
 
@@ -193,7 +171,7 @@ export async function getClassSettingsBody(classID: string, className: string) {
 
         for (const sectionId of Object.keys(sectionInfo.droppedAssignments)) {
             const sectionName: string = classInfo.find(
-                (assignment) => assignment.AssignmentTypeId == sectionId
+                assignment => assignment.AssignmentTypeId.toString() == sectionId
             ).AssignmentType;
 
             const row = createEl("tr");
@@ -204,27 +182,17 @@ export async function getClassSettingsBody(classID: string, className: string) {
                 createEl("td", ["col-md-2"], "", {
                     "data-linked-section-weight": sectionId,
                 }),
-                createEl(
-                    "td",
-                    ["col-md-2"],
-                    sectionInfo.droppedAssignments[sectionId],
-                    {
-                        "data-linked-section-dropped": sectionId,
-                        contentEditable: "true",
-                    }
-                ),
+                createEl("td", ["col-md-2"], sectionInfo.droppedAssignments[sectionId], {
+                    "data-linked-section-dropped": sectionId,
+                    "contentEditable": "true",
+                }),
             ];
 
             if (sectionInfo.weights === TOTAL_POINTS) {
                 els[1].innerHTML = "N/A";
-                addToolTip(
-                    els[1],
-                    "Total points classes don't have category weights"
-                );
+                addToolTip(els[1], "Total points classes don't have category weights");
             } else {
-                els[1].innerHTML =
-                    sectionInfo.weights[sectionId] +
-                    `<span class="muted">%</span>`;
+                els[1].innerHTML = sectionInfo.weights[sectionId] + `<span class="muted">%</span>`;
             }
 
             row.append(...els);
@@ -240,8 +208,7 @@ export async function getClassSettingsBody(classID: string, className: string) {
                     return;
                 }
 
-                classSettings.sectionInfo[sectionId as any].droppedAssignments =
-                    num;
+                classSettings.sectionInfo[sectionId as any].droppedAssignments = num;
                 saveSettings();
             });
         }
@@ -251,20 +218,11 @@ export async function getClassSettingsBody(classID: string, className: string) {
 
     // Semester Weighting
     {
-        const examWeightingTitle = createEl(
-            "div",
-            [],
-            "<h3>Semester Weighting</h3>"
-        );
+        const examWeightingTitle = createEl("div", [], "<h3>Semester Weighting</h3>");
         body.append(examWeightingTitle);
         const table = createEl(
             "table",
-            [
-                "table",
-                "table-striped",
-                "table-condensed",
-                "table-mobile-stacked",
-            ],
+            ["table", "table-striped", "table-condensed", "table-mobile-stacked"],
             ""
         );
 
@@ -276,32 +234,19 @@ export async function getClassSettingsBody(classID: string, className: string) {
         const tbody = createEl("tbody");
         table.append(tbody);
 
-        headRow.append(
-            createEl("th", [], "Time Period"),
-            createEl("th", [], "Weight")
-        );
+        headRow.append(createEl("th", [], "Time Period"), createEl("th", [], "Weight"));
 
-        for (const timePeriod of [
-            GradePeriod.Q1,
-            GradePeriod.Q2,
-            GradePeriod.EXAM,
-        ]) {
+        for (const timePeriod of [GradePeriod.Q1, GradePeriod.Q2, GradePeriod.EXAM]) {
             const row = createEl("tr");
             tbody.append(row);
 
             const els = [
-                createEl(
-                    "td",
-                    ["col-md-7"],
-                    getNiceNameForGradePeriod(timePeriod)
-                ),
+                createEl("td", ["col-md-7"], getNiceNameForGradePeriod(timePeriod)),
 
                 createEl(
                     "td",
                     ["col-md-2"],
-                    `${
-                        timePeriod == GradePeriod.EXAM ? "20" : "40"
-                    }<span class="muted">%</span>`
+                    `${timePeriod == GradePeriod.EXAM ? "20" : "40"}<span class="muted">%</span>`
                 ),
             ];
             row.append(...els);
@@ -314,8 +259,7 @@ export async function getClassSettingsBody(classID: string, className: string) {
 }
 
 export async function renderClassSettings(classId: string) {
-    const oldHeaderTextEl =
-        document.getElementsByClassName("bb-dialog-header")[0];
+    const oldHeaderTextEl = document.getElementsByClassName("bb-dialog-header")[0];
     const oldBody = document.getElementsByClassName("modal-body")[0];
     const oldFooter = document.getElementsByClassName("modal-footer")[0];
 
@@ -331,16 +275,8 @@ export async function renderClassSettings(classId: string) {
         { float: "right" }
     );
 
-    const lastBtn = createEl(
-        "button",
-        ["btn", "btn-default", "disabled"],
-        "Last Class"
-    );
-    const nextBtn = createEl(
-        "button",
-        ["btn", "btn-default", "disabled"],
-        "Next Class"
-    );
+    const lastBtn = createEl("button", ["btn", "btn-default", "disabled"], "Last Class");
+    const nextBtn = createEl("button", ["btn", "btn-default", "disabled"], "Next Class");
 
     newFooter.append(lastBtn, nextBtn, closeSettingsBtn);
     oldFooter.replaceWith(newFooter);

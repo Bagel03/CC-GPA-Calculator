@@ -10,10 +10,11 @@ export type GPACalcSettings = {
                 {
                     droppedAssignments: number;
                     weight: number;
+                    extraCreditAssignments: number[];
                 }
             >;
             gradeFormula: TOTAL_POINTS | WEIGHTED;
-            type: ClassType;
+            type: number;
         }
     >;
 };
@@ -28,8 +29,8 @@ export function getSettings(): GPACalcSettings {
         currentSettings = defaultSettings;
         saveSettings();
     }
-    if (!currentSettings)
-        currentSettings = JSON.parse(localStorage.getItem("gpa-calc-settings"));
+    if (!currentSettings) currentSettings = JSON.parse(localStorage.getItem("gpa-calc-settings"));
+
     return currentSettings;
 }
 

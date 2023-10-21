@@ -1,25 +1,13 @@
 import { fetchClasses } from "../../../api/classes.js";
-import { fetchClassInfo } from "../../../api/class_info.js";
-import {
-    fetchMarkingPeriods,
-    getCurrentMarkingPeriod,
-} from "../../../api/marking_period.js";
-import {
-    ClassType,
-    getClassTypeFromName,
-    getClassTypeName,
-    getNumberOfClassesOfType,
-} from "../../../grades/class_type.js";
-import {
-    getExamGradeForOverall,
-    getOverallGrade,
-    GradePeriod,
-} from "../../../grades/exams.js";
+import { fetchAssignments } from "../../../api/assignments.js";
+import { fetchMarkingPeriods, getCurrentMarkingPeriod } from "../../../api/marking_period.js";
+import { ClassType, getNumberOfClassesOfType } from "../../../grades/class_type.js";
+import { getExamGradeForOverall, getOverallGrade, GradePeriod } from "../../../grades/exams.js";
 import { Grade } from "../../../grades/grade.js";
 import { createEl } from "../../../utils/elements.js";
 import { selectContentEditableElement } from "../../../utils/select.js";
 import { addToolTip, removeToolTip } from "../../../utils/tooltip.js";
-import { rerenderAllGPAs } from "./quarter/footer.js";
+import { getCurrentGPAFormula, rerenderAllGPAs } from "./quarter/footer.js";
 
 export async function renderExamTable(year?: string, duration?: string) {
     // markingPeriod ??= await getCurrentMarkingPeriod();
@@ -49,16 +37,10 @@ export async function renderExamTable(year?: string, duration?: string) {
     table.append(body);
     const classes = await fetchClasses(year, duration);
     await Promise.all(
-        classes.map(async (c) => {
+        classes.map(async c => {
             const markingPeriods = await fetchMarkingPeriods(year, duration);
-            const q1info = await fetchClassInfo(
-                c.sectionid,
-                markingPeriods[0].MarkingPeriodId
-            );
-            const q2info = await fetchClassInfo(
-                c.sectionid,
-                markingPeriods[1].MarkingPeriodId
-            );
+            const q1info = await fetchAssignments(c.sectionid, markingPeriods[0].MarkingPeriodId);
+            const q2info = await fetchAssignments(c.sectionid, markingPeriods[1].MarkingPeriodId);
 
             let q1GradeString = q1info[0]?.SectionGrade;
             let q2GradeString = q2info[0]?.SectionGrade;
@@ -78,7 +60,7 @@ export async function renderExamTable(year?: string, duration?: string) {
             body.append(row);
 
             const name = c.sectionidentifier;
-            const type: ClassType = getClassTypeFromName(name);
+            const type: ClassType = ClassType.fromName(name);
             if (type == ClassType.UNMARKED) return;
 
             const grades = {
@@ -88,9 +70,7 @@ export async function renderExamTable(year?: string, duration?: string) {
                 [GradePeriod.OVERALL]: null as Grade,
             };
             grades[GradePeriod.EXAM] = new Grade(
-                (grades[GradePeriod.Q1].percentage +
-                    grades[GradePeriod.Q2].percentage) /
-                    2
+                (grades[GradePeriod.Q1].percentage + grades[GradePeriod.Q2].percentage) / 2
             );
             grades[GradePeriod.OVERALL] = new Grade(
                 getOverallGrade(
@@ -101,71 +81,40 @@ export async function renderExamTable(year?: string, duration?: string) {
             );
 
             const els = [
-                createEl(
-                    "th",
-                    ["col-md-4"],
-                    name.replace(/ - [0-9] \(Period [0-9]\)/, "").trim()
-                ),
-                createEl(
-                    "th",
-                    ["col-md-1"],
-                    grades[GradePeriod.Q1].getNumbers(),
-                    {
-                        contentEditable: "true",
-                        "data-grade-type": GradePeriod.Q1,
-                    }
-                ),
-                createEl(
-                    "th",
-                    ["col-md-1"],
-                    grades[GradePeriod.Q2].getNumbers(),
-                    {
-                        contentEditable: "true",
-                        "data-grade-type": GradePeriod.Q2,
-                    }
-                ),
-                createEl(
-                    "th",
-                    ["col-md-1"],
-                    grades[GradePeriod.EXAM].getNumbers(),
-                    {
-                        contentEditable: "true",
-                        "data-grade-type": GradePeriod.EXAM,
-                    }
-                ),
-                createEl(
-                    "th",
-                    ["col-md-1"],
-                    grades[GradePeriod.OVERALL].getNumbers(),
-                    {
-                        contentEditable: "true",
-                        "data-grade-type": GradePeriod.OVERALL,
-                    }
-                ),
-                createEl(
-                    "th",
-                    ["col-md-1"],
-                    grades[GradePeriod.OVERALL].toString(),
-                    { contentEditable: "true" }
-                ),
+                createEl("th", ["col-md-4"], name.replace(/ - [0-9] \(Period [0-9]\)/, "").trim()),
+                createEl("th", ["col-md-1"], grades[GradePeriod.Q1].getNumbers(), {
+                    "contentEditable": "true",
+                    "data-grade-type": GradePeriod.Q1,
+                }),
+                createEl("th", ["col-md-1"], grades[GradePeriod.Q2].getNumbers(), {
+                    "contentEditable": "true",
+                    "data-grade-type": GradePeriod.Q2,
+                }),
+                createEl("th", ["col-md-1"], grades[GradePeriod.EXAM].getNumbers(), {
+                    "contentEditable": "true",
+                    "data-grade-type": GradePeriod.EXAM,
+                }),
+                createEl("th", ["col-md-1"], grades[GradePeriod.OVERALL].getNumbers(), {
+                    "contentEditable": "true",
+                    "data-grade-type": GradePeriod.OVERALL,
+                }),
+                createEl("th", ["col-md-1"], grades[GradePeriod.OVERALL].toString(), {
+                    contentEditable: "true",
+                }),
                 // Add some stuff so the formula dropdown can change it
                 createEl(
                     "th",
                     ["col-md-1", "table-gpa"],
-                    grades[GradePeriod.OVERALL].getGPA(type).toFixed(2),
+                    getCurrentGPAFormula().calc(grades[GradePeriod.OVERALL], type).toFixed(2),
                     {
-                        "data-raw-grade":
-                            grades[GradePeriod.OVERALL].percentage.toString(),
+                        "data-raw-grade": grades[GradePeriod.OVERALL].percentage.toString(),
                         "data-class-type": type.toString(),
                     }
                 ),
             ];
 
             if (doesNotHaveQ2Grade) {
-                addToolTip(
-                    els[2],
-                    "This grade is not in yet, so it is the same as the quarter before"
-                );
+                addToolTip(els[2], "This grade is not in yet, so it is the same as the quarter before");
             }
             addToolTip(els[3], "This is an average of your 2 quarter grades");
 
@@ -179,24 +128,15 @@ export async function renderExamTable(year?: string, duration?: string) {
                     selectContentEditableElement(el);
                 });
 
-                el.addEventListener("blur", (e) => {
+                el.addEventListener("blur", e => {
                     if (Number.isNaN(parseFloat(el.innerHTML))) {
                         console.error("could not set grade");
                         return;
                     }
 
-                    const [
-                        _,
-                        q1Element,
-                        q2Element,
-                        examElement,
-                        overallElement,
-                        gradeElement,
-                        gpaElement,
-                    ] = el.parentElement.children as any as HTMLDivElement[];
-                    grades[el.dataset.gradeType] = new Grade(
-                        parseFloat(el.innerHTML)
-                    );
+                    const [_, q1Element, q2Element, examElement, overallElement, gradeElement, gpaElement] =
+                        el.parentElement.children as any as HTMLDivElement[];
+                    grades[el.dataset.gradeType] = new Grade(parseFloat(el.innerHTML));
                     grades[GradePeriod.OVERALL] = new Grade(
                         getOverallGrade(
                             grades[GradePeriod.Q1].percentage,
@@ -205,10 +145,8 @@ export async function renderExamTable(year?: string, duration?: string) {
                         )
                     );
 
-                    overallElement.innerHTML =
-                        grades[GradePeriod.OVERALL].getNumbers();
-                    gradeElement.innerHTML =
-                        grades[GradePeriod.OVERALL].toString();
+                    overallElement.innerHTML = grades[GradePeriod.OVERALL].getNumbers();
+                    gradeElement.innerHTML = grades[GradePeriod.OVERALL].toString();
 
                     removeToolTip(el);
                     // gpaElement.innerHTML = grades[GradePeriod.OVERALL].getGPA();
@@ -227,9 +165,7 @@ export async function renderExamTable(year?: string, duration?: string) {
                     console.error("could not set grade");
                 }
 
-                grades[GradePeriod.OVERALL] = new Grade(
-                    parseFloat(overallEl.innerHTML)
-                );
+                grades[GradePeriod.OVERALL] = new Grade(parseFloat(overallEl.innerHTML));
                 grades[GradePeriod.EXAM] = new Grade(
                     getExamGradeForOverall(
                         grades[GradePeriod.OVERALL].percentage,
@@ -239,8 +175,7 @@ export async function renderExamTable(year?: string, duration?: string) {
                 );
 
                 overallEl.innerHTML = grades[GradePeriod.OVERALL].getNumbers();
-                gpaEl.dataset.rawGrade =
-                    grades[GradePeriod.OVERALL].percentage.toString();
+                gpaEl.dataset.rawGrade = grades[GradePeriod.OVERALL].percentage.toString();
 
                 rerenderAllGPAs();
 
@@ -266,9 +201,7 @@ export async function renderExamTable(year?: string, duration?: string) {
             });
 
             markEl.addEventListener("blur", () => {
-                grades[GradePeriod.OVERALL] = Grade.parseGrade(
-                    markEl.innerHTML
-                );
+                grades[GradePeriod.OVERALL] = Grade.parseGrade(markEl.innerHTML);
 
                 overallEl.innerHTML = grades[GradePeriod.OVERALL].getNumbers();
 
@@ -295,9 +228,7 @@ export async function renderExamTable(year?: string, duration?: string) {
         const unmarkedCol = createEl(
             "th",
             ["muted"],
-            `Table does not include ${numUnmarked} unmarked class${
-                numUnmarked > 1 ? "es" : ""
-            }`,
+            `Table does not include ${numUnmarked} unmarked class${numUnmarked > 1 ? "es" : ""}`,
             { colspan: "7" },
             { textAlign: "center" }
         );
