@@ -14,7 +14,7 @@ async function renderClassModalAfterFullyLoaded() {
         renderClassPercentage(currentClass.sectionid.toString()),
         renderResetButton(),
         renderLinks(currentClass.sectionid.toString()),
-        appendExtraCreditInfo(),
+        appendExtraCreditInfo(currentClass.sectionid.toString()),
     ]);
 }
 

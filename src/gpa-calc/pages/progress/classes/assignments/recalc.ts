@@ -14,7 +14,7 @@ export async function recalculateGrade(classId: string) {
 
     const assignmentsBySection = new Map<
         string,
-        { score: number; max: number }[]
+        { score: number; max: number; extraCredit:boolean }[]
     >();
 
     // Load grades
@@ -31,11 +31,13 @@ export async function recalculateGrade(classId: string) {
             .split("/")
             .map((x) => parseFloat(x));
 
+        let ecElement = grade.parentElement.firstElementChild.firstElementChild as HTMLInputElement
+
         if (!assignmentsBySection.has(section)) {
             assignmentsBySection.set(section, []);
         }
 
-        assignmentsBySection.get(section).push({ score, max: gradeMax });
+        assignmentsBySection.get(section).push({ score, max: gradeMax, extraCredit: ecElement.checked });
         // const sectionTotal = sectionTotals.get(section);
 
         // sectionTotal.current += score;
@@ -66,7 +68,7 @@ export async function recalculateGrade(classId: string) {
             ({ score, max }) => !(Number.isNaN(score) || Number.isNaN(max))
         );
 
-        const max = assignments.reduce((prev, curr) => prev + curr.max, 0);
+        const max = assignments.reduce((prev, curr) => prev + (curr.extraCredit ? 0 : curr.max), 0);
         const current = assignments.reduce(
             (prev, curr) => prev + curr.score,
             0

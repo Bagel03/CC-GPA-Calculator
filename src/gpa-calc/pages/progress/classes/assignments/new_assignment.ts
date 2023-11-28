@@ -17,7 +17,14 @@ export function renderNewAssignment(sectionID: string, classID: string) {
     const score = createEl("h4", [], `100<span class="muted">/100</span>`, {}, { margin: "0px" });
     scoreContainer.append(score)
 
+    let ecTD = createEl("td", ["ec-checkbox"])
+    let checkbox = createEl("input")
+    checkbox.type = "checkbox"
+    checkbox.onclick = () => {recalculateGrade(classID)}
+    ecTD.append(checkbox)
+
     row.append(
+        ecTD,
         createEl("td", ["col-md-3"], "New Assignment"),
         createEl("td", ["col-md-1"], "N/A"),
         createEl("td", ["col-md-1"], "N/A"),
@@ -25,7 +32,7 @@ export function renderNewAssignment(sectionID: string, classID: string) {
         createEl("td", [], "Hypothetical Assignment"),
     )
 
-    addToolTip(row.children[0] as any, "This is a custom assignment that doesn't actually exist");
+    addToolTip(row.children[1] as any, "This is a custom assignment that doesn't actually exist");
 
     body.append(row);
     selectContentEditableElement(scoreContainer);
