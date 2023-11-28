@@ -2,8 +2,9 @@ import { ClassType } from "../../../../grades/class_type.js";
 import { GpaFormula } from "../../../../grades/gpa.js";
 import { Grade } from "../../../../grades/grade.js";
 import { createEl } from "../../../../utils/elements.js";
+import { addToolTip, removeToolTip } from "../../../../utils/tooltip.js";
 import { renderExamTable } from "../exam_table.js";
-import { renderTable } from "./table.js";
+import { hideHiddenClassesInTable, renderTable } from "./table.js";
 
 export function renderFooter() {
     const footer = createEl("div", ["modal-footer"]);
@@ -119,17 +120,21 @@ export function renderFooter() {
 
     // <ul class="dropdown-menu" role="menu">            <li class="active"><a href="#" data-value="13370" data-bypass="1">3rd Quarter</a></li>            <li><a href="#" data-value="13371" data-bypass="1">4th Quarter</a></li>    </ul>
     // <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">    <span class="caret"></span></button>
-
+    rerenderAllGPAs();
     return footer;
 }
 
 export function getCurrentGPAFormula(): GpaFormula {
-    const parent = document.querySelector("[data-formula]").parentElement.parentElement;
+    const parent = document.querySelector("[data-formula]")?.parentElement.parentElement;
+    if (!parent) return GpaFormula.CC;
     const formulaString = parent.querySelector<HTMLLinkElement>(".active>a").dataset.formula;
     return GpaFormula.getById(parseInt(formulaString));
 }
 
 export function rerenderAllGPAs() {
+    // First, remove any classes that aren't important anymore
+    hideHiddenClassesInTable();
+
     const formulaType = getCurrentGPAFormula();
 
     // const formulaType = parseInt(
@@ -139,8 +144,20 @@ export function rerenderAllGPAs() {
     const classes: { grade: Grade; classType: ClassType }[] = [];
 
     for (const gpaSquare of document.querySelectorAll(".table-gpa") as NodeListOf<HTMLTableCellElement>) {
-        const classType = ClassType.getById(parseInt(gpaSquare.dataset.classType));
-        const rawGrade = parseFloat(gpaSquare.dataset.rawGrade);
+        const row = gpaSquare.parentElement as HTMLTableElement;
+
+        removeToolTip(row.children.item(0)!);
+        if (row.hidden) continue;
+
+        const classType = ClassType.getById(parseInt(row.dataset.classType));
+        if (!formulaType.processesType(classType)) {
+            addToolTip(
+                row.children.item(0)! as HTMLElement,
+                "This class is ignored by the current GPA formula"
+            );
+        }
+
+        const rawGrade = parseFloat(row.querySelector(".table-gpa-source").innerHTML);
 
         const grade = new Grade(rawGrade);
         gpaSquare.innerText = formulaType.calc(grade, classType).toFixed(2);

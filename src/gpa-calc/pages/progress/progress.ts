@@ -1,5 +1,5 @@
 import { fetchClasses } from "../../api/classes.js";
-import { fetchClassInfo } from "../../api/class_info.js";
+import { fetchAssignments } from "../../api/assignments.js";
 import { fetchMarkingPeriods } from "../../api/marking_period.js";
 import { renderToolTip } from "../../utils/tooltip.js";
 import { renderBubble } from "./bubble.js";

@@ -9,20 +9,28 @@ export function renderToolTip() {
     document.body.append(toolTip);
 }
 
-export function addToolTip(element: HTMLDivElement, string: string) {
+export function addToolTip(element: HTMLElement, string: string, centerOnText = true) {
     element.classList.add("has-tooltip");
     element.dataset.toolTipMessage = string;
 
     element.addEventListener("mouseover", () => {
         if (!element.classList.contains("has-tooltip")) return;
 
-        const { top, left, width, height, bottom } =
-            element.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const { top, left, width, height, bottom } = (centerOnText ? range : element).getBoundingClientRect();
 
         const tooltipWidth = toolTip.clientWidth;
         const tooltipHeight = toolTip.clientHeight;
 
-        toolTip.style.top = top - tooltipHeight + window.scrollY + "px";
+        const { padding, borderWidth } = window.getComputedStyle(element);
+        // console.log(padding, borderWidth);
+        toolTip.style.top =
+            top -
+            tooltipHeight +
+            window.scrollY -
+            (centerOnText ? parseFloat(padding) + parseFloat(borderWidth) : 0) +
+            "px";
         toolTip.style.left = left - tooltipWidth / 2 + width / 2 + "px";
         toolTip.style.opacity = "1";
 
@@ -32,6 +40,6 @@ export function addToolTip(element: HTMLDivElement, string: string) {
     element.addEventListener("mouseout", () => (toolTip.style.opacity = "0"));
 }
 
-export function removeToolTip(element: HTMLDivElement) {
+export function removeToolTip(element: Element) {
     element.classList.remove("has-tooltip");
 }

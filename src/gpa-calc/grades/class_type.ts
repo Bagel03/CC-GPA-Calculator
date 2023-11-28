@@ -1,7 +1,9 @@
+import { Grade } from "./grade";
+
 export class ClassType {
     private static readonly allClassTypes: ClassType[] = [];
-    static getById(id: number) {
-        return this.allClassTypes.find(c => c.id === id);
+    static getById(id: string | number) {
+        return this.allClassTypes.find(c => c.id == id);
     }
 
     private static nextId: number = 0;
@@ -53,7 +55,21 @@ export class ClassType {
 
         return ClassType.REGULAR;
     }
+
+    calculateOverallGrade(q1: Grade, q2: Grade, exam: Grade) {
+        return new Grade(0.4 * q1.percentage + 0.4 * q2.percentage + 0.2 * exam.percentage);
+    }
 }
+
+// class APClass extends ClassType {
+//     constructor() {
+//         super("AP", [], ["ap"],  true)
+//     }
+
+//     calculateTotalOverallGrade(q1: Grade, q2: Grade, exam: Grade): Grade {
+
+//     }
+// }
 
 // export const ClassType = {
 //     REGULAR: 0,
