@@ -32,7 +32,10 @@ export interface AssignmentInfo {
     FormativeInd: boolean;
 }
 
-export async function fetchAssignments(classId: string, markingPeriod: number): Promise<AssignmentInfo[]> {
+export async function fetchAssignments(
+    classId: string | number,
+    markingPeriod: number
+): Promise<AssignmentInfo[]> {
     const shortName = classId + "-" + markingPeriod;
     if (classCache[shortName]) {
         return classCache[shortName];
@@ -42,7 +45,7 @@ export async function fetchAssignments(classId: string, markingPeriod: number): 
         "https://catholiccentral.myschoolapp.com/api/datadirect/GradeBookPerformanceAssignmentStudentList/"
     );
 
-    url.searchParams.append("sectionId", classId);
+    url.searchParams.append("sectionId", classId.toString());
     url.searchParams.append("markingPeriodId", markingPeriod.toString());
     url.searchParams.append("studentUserId", await getUserId());
     url.searchParams.append("personaId", "2");

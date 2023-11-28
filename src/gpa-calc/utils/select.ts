@@ -6,3 +6,16 @@ export function selectContentEditableElement(element: HTMLElement) {
     sel.removeAllRanges();
     sel.addRange(range);
 }
+
+export function selectElementOnFocus(element: HTMLElement) {
+    element.addEventListener("focus", () => {
+        selectContentEditableElement(element);
+    });
+
+    element.addEventListener("keydown", e => {
+        if (e.code === "Enter") {
+            element.blur();
+            e.preventDefault();
+        }
+    });
+}

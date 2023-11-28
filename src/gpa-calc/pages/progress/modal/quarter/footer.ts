@@ -157,7 +157,7 @@ export function rerenderAllGPAs() {
             );
         }
 
-        const rawGrade = parseFloat(row.childNodes.item(2).textContent);
+        const rawGrade = parseFloat(row.querySelector(".table-gpa-source").innerHTML);
 
         const grade = new Grade(rawGrade);
         gpaSquare.innerText = formulaType.calc(grade, classType).toFixed(2);

@@ -4,7 +4,7 @@ import { ClassType } from "../../../grades/class_type";
 import { GradePeriod, getNiceNameForGradePeriod } from "../../../grades/exams";
 import { createEl } from "../../../utils/elements";
 import { setModalHeight } from "../../../utils/modal_height";
-import { selectContentEditableElement } from "../../../utils/select";
+import { selectContentEditableElement, selectElementOnFocus } from "../../../utils/select";
 import { getSettings, saveSettings } from "../../../utils/settings";
 import { shortenClassName } from "../../../utils/shorten_class";
 import { addToolTip } from "../../../utils/tooltip";
@@ -197,9 +197,10 @@ export async function getClassSettingsBody(classID: string, className: string) {
 
             row.append(...els);
 
-            els[2].addEventListener("focus", function () {
-                selectContentEditableElement(els[2]);
-            });
+            selectElementOnFocus(els[2]);
+            // els[2].addEventListener("focus", function () {
+            //     selectContentEditableElement(els[2]);
+            // });
             els[2].addEventListener("blur", function () {
                 const num = parseInt(els[2].innerHTML);
 
