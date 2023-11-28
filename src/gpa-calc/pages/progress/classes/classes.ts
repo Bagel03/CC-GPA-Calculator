@@ -4,6 +4,7 @@ import { renderLinks } from "./assignments/links.js";
 import { renderResetButton } from "./assignments/reset.js";
 import { renderClassPercentage } from "./percentage.js";
 import { clearAllElements, anyElementsPresent } from "../../../utils/elements.js";
+import {appendExtraCreditInfo} from "./assignments/extra_credit";
 
 async function renderClassModalAfterFullyLoaded() {
     const name = document.getElementsByClassName("modal-header")[0].children[1].innerHTML;
@@ -13,6 +14,7 @@ async function renderClassModalAfterFullyLoaded() {
         renderClassPercentage(currentClass.sectionid.toString()),
         renderResetButton(),
         renderLinks(currentClass.sectionid.toString()),
+        appendExtraCreditInfo(),
     ]);
 }
 
