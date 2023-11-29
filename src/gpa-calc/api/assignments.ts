@@ -1,4 +1,5 @@
 import { getUserId } from "./context.js";
+import { getCurrentMarkingPeriod } from "./marking_period.js";
 
 const classCache = {} as Record<string, any>;
 
@@ -32,9 +33,12 @@ export interface AssignmentInfo {
     FormativeInd: boolean;
 }
 
+let loadedCurrentMarkingPeriod: number;
+getCurrentMarkingPeriod().then(res => (loadedCurrentMarkingPeriod = res));
+
 export async function fetchAssignments(
     classId: string | number,
-    markingPeriod: number
+    markingPeriod: number = loadedCurrentMarkingPeriod
 ): Promise<AssignmentInfo[]> {
     const shortName = classId + "-" + markingPeriod;
     if (classCache[shortName]) {

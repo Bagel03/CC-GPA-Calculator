@@ -6,11 +6,12 @@ export type GPACalcSettings = {
         string,
         {
             sectionInfo: Record<
-                number,
+                number | string,
                 {
                     droppedAssignments: number;
                     weight: number;
                     extraCreditAssignments: number[];
+                    dontLookForExtraCredit: boolean;
                 }
             >;
             gradeFormula: TOTAL_POINTS | WEIGHTED;

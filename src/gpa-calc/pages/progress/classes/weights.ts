@@ -9,9 +9,10 @@ export const WEIGHTED = "WEIGHTED" as const;
 export type WEIGHTED = typeof WEIGHTED;
 
 export type sectionInfo = {
-    weights: Record<number, number> | TOTAL_POINTS;
-    droppedAssignments: Record<number, number>;
-    extraCreditAssignments: Record<number, number[]>;
+    weights: Record<number | string, number> | TOTAL_POINTS;
+    droppedAssignments: Record<number | string, number>;
+    extraCreditAssignments: Record<number | string, number[]>;
+    names: Record<number | string, string>;
 };
 
 export async function getSectionWeightsAndInfo(classId: string): Promise<sectionInfo> {
@@ -28,8 +29,10 @@ export async function getSectionWeightsAndInfo(classId: string): Promise<section
     const settings = getSettings().classes[classId].sectionInfo;
 
     let weights: Record<number, number> | TOTAL_POINTS = {};
+    let names = {};
 
-    for (const { AssignmentTypeId, Weight } of classData) {
+    for (const { AssignmentTypeId, Weight, AssignmentType } of classData) {
+        names[AssignmentTypeId] = AssignmentType;
         weights[AssignmentTypeId] = Weight;
         settings[AssignmentTypeId] ??= {} as any;
     }
@@ -52,7 +55,7 @@ export async function getSectionWeightsAndInfo(classId: string): Promise<section
 
     saveSettings();
 
-    return { weights, droppedAssignments, extraCreditAssignments };
+    return { weights, droppedAssignments, extraCreditAssignments, names };
 }
 
 /*
