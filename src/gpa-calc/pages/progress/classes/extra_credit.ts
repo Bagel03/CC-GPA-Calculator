@@ -2,7 +2,7 @@ import { AssignmentInfo } from "../../../api/assignments";
 import { EnrichedAssignment } from "./enriched_info";
 
 export function closeEnoughForEc(actual: number, calculated: number) {
-    return Math.abs(actual - calculated) < 0.01;
+    return Math.abs(actual - calculated) < 0.1;
 }
 
 export function findExtraCredit(assignments: EnrichedAssignment[]) {
@@ -27,27 +27,40 @@ export function findExtraCredit(assignments: EnrichedAssignment[]) {
 
     // Get rid of any assignments bigger than this many points
     const possibleEcAssignments = assignments.filter(a => a.MaxPoints <= ecPoints);
+    const combinations = getCombinations(possibleEcAssignments).map(assignments => ({
+        assignments,
+        diff: Math.abs(assignments.reduce((prev, a) => prev + a.MaxPoints, 0) - ecPoints),
+    }));
 
-    // First check for one assignment with that many points. If its there return it:
-    const singleEC = possibleEcAssignments.find(a => closeEnoughForEc(a.MaxPoints, ecPoints));
-    if (singleEC) return [singleEC];
+    const sorted = combinations.sort((a, b) => a.diff - b.diff);
 
-    // Now check for combinations
-    const combinations = getCombinations(possibleEcAssignments);
-    console.log(
-        combinations.map(c => c.reduce((prev, a) => prev + a.MaxPoints, 0) - ecPoints),
-        combinations
-    );
+    if (sorted[0].diff > ecPoints) {
+        console.log("???");
+        return [];
+    }
 
-    // debugger;
-    const manyEc = combinations.find(c =>
-        closeEnoughForEc(
-            ecPoints,
-            c.reduce((prev, a) => prev + a.MaxPoints, 0)
-        )
-    );
-    if (manyEc) return manyEc;
-    return [];
+    return sorted[0].assignments;
+
+    // // First check for one assignment with that many points. If its there return it:
+    // const singleEC = possibleEcAssignments.find(a => closeEnoughForEc(a.MaxPoints, ecPoints));
+    // if (singleEC) return [singleEC];
+
+    // // Now check for combinations
+    // const combinations = getCombinations(possibleEcAssignments);
+    // console.log(
+    //     combinations.map(c => c.reduce((prev, a) => prev + a.MaxPoints, 0) - ecPoints),
+    //     combinations
+    // );
+
+    // // debugger;
+    // const manyEc = combinations.find(c =>
+    //     closeEnoughForEc(
+    //         ecPoints,
+    //         c.reduce((prev, a) => prev + a.MaxPoints, 0)
+    //     )
+    // );
+    // if (manyEc) return manyEc;
+    // return [];
 
     console.log("Couldn't find EC");
 }
