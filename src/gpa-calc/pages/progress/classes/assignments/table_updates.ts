@@ -1,3 +1,4 @@
+import { fetchAssignments } from "../../../../api/assignments";
 import { createEl } from "../../../../utils/elements";
 import { getHTMLTextContent } from "../../../../utils/fix_name";
 import { selectElementOnFocus } from "../../../../utils/select";
@@ -13,17 +14,32 @@ type assignmentInfo = {
 };
 
 export function hideSettings() {
-    for (const el of document.querySelectorAll<HTMLElement>(".gpa-settings")) {
-        el.hidden = true;
+    const hideSettingsStyle = createEl(
+        "style",
+        [],
+        `
+    .gpa-settings {
+        display: none
     }
+    `,
+        { id: "gpa-settings-toggle-style" }
+    );
+
+    document.head.append(hideSettingsStyle);
+    // for (const el of document.querySelectorAll<HTMLElement>(".gpa-settings")) {
+    //     el.hidden = true;
+    // }
 
     document.getElementById("gpa-settings-toggle")!.innerText = "GPA Calculator Settings...";
 }
 
 export function showSettings() {
-    for (const el of document.querySelectorAll<HTMLElement>(".gpa-settings")) {
-        el.hidden = false;
-    }
+    // for (const el of document.querySelectorAll<HTMLElement>(".gpa-settings")) {
+    //     el.hidden = false;
+    // }
+    const hideSettingsStyle = document.getElementById("gpa-settings-toggle-style")!;
+    hideSettingsStyle.remove();
+
     document.getElementById("gpa-settings-toggle")!.innerText = "Hide GPA Calculator Settings";
     // document
     //     .querySelector(".modal-body")
@@ -32,16 +48,24 @@ export function showSettings() {
 }
 
 export function toggleSettings() {
-    const el = document.querySelector<HTMLElement>(".gpa-settings");
-    if (el.hidden) showSettings();
+    const styleEl = document.getElementById("gpa-settings-toggle-style");
+    if (styleEl) showSettings();
     else hideSettings();
 }
 
 export async function appendExtraCreditInfo(classID: string) {
     const assignments = await getEnrichedAssignments(classID);
     const info = await getSectionWeightsAndInfo(classID);
+    // console.log(
+    //     Object.keys(info.droppedAssignments),
+    //     Object.keys(info.droppedAssignments)
+    //         .map(document.getElementById.bind(document))
+    //         .map(x => x.nextElementSibling)
+    // );
 
+    // console.log(await fetchAssignments(classID));
     for (const [section, sectionAssignments] of Object.entries(assignments)) {
+        // console.log(section, sectionAssignments);
         const sectionTitleBar = document.getElementById(section);
         const table = sectionTitleBar.nextElementSibling as HTMLTableElement;
 
@@ -81,7 +105,6 @@ export async function appendExtraCreditInfo(classID: string) {
                         }
 
                         saveSettings();
-                        // TODO: re-render grades and stuff
                         recalculateGrade(classID);
                     },
                 },
@@ -177,13 +200,16 @@ export async function appendExtraCreditInfo(classID: string) {
         });
     }
 
-    for (const el of document.querySelectorAll<HTMLElement>(".gpa-settings")) {
-        el.hidden = true;
-    }
+    // for (const el of document.querySelectorAll<HTMLElement>(".gpa-settings")) {
+    //     el.hidden = true;
+    // }
+
+    hideSettings();
 
     return;
 }
 
+// Appends the "extra credit" and "currently dropped"
 export async function appendExtraNotes(classId: string) {
     document.querySelectorAll(".gpa-assignment-extra-info").forEach(e => e.remove());
 
@@ -215,7 +241,7 @@ export async function appendExtraNotes(classId: string) {
         for (const row of table.lastElementChild.children as any as NodeListOf<HTMLTableRowElement>) {
             const lastEl = row.lastElementChild;
             const checkBox = row.firstElementChild.firstElementChild as HTMLInputElement;
-            console.log(row.children[1].textContent, checkBox.checked);
+            // console.log(row.children[1].textContent, checkBox.checked);
             const extraInfoEl = createEl("span", ["gpa-assignment-extra-info"]);
             if (checkBox.checked) {
                 extraInfoEl.append("Extra credit");

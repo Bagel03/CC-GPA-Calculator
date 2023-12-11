@@ -47,7 +47,7 @@ export async function getEnrichedAssignments(classId: string) {
 
         const shouldntLookForEc =
             getSettings().classes[classId].sectionInfo[sectionId].dontLookForExtraCredit;
-        if (shouldntLookForEc) return result;
+        if (shouldntLookForEc) continue;
 
         // Do the final check
         let maxPoints = 0;
@@ -61,7 +61,7 @@ export async function getEnrichedAssignments(classId: string) {
         }
 
         let calculatedScore = (totalPoints / maxPoints) * 100;
-        console.log(calculatedScore.toFixed(2), parseFloat(sectionAssignments[0].Percentage).toFixed(2));
+        // console.log(calculatedScore.toFixed(2), parseFloat(sectionAssignments[0].Percentage).toFixed(2));
         if (!closeEnoughForEc(calculatedScore, parseFloat(sectionAssignments[0].Percentage))) {
             // Too much extra credit
             getSettings().classes[classId].sectionInfo[sectionId].dontLookForExtraCredit = true;

@@ -4,8 +4,6 @@ import { addToolTip } from "../../../../utils/tooltip.js";
 import { recalculateGrade } from "./recalc.js";
 import { enableResetButton } from "./reset.js";
 
-
-
 export function renderNewAssignment(sectionID: string, classID: string) {
     const element = document.getElementById(sectionID);
     const table = element.nextElementSibling;
@@ -13,24 +11,40 @@ export function renderNewAssignment(sectionID: string, classID: string) {
 
     const row = createEl("tr", ["hypotheticalAssignment"]);
 
-    const scoreContainer = createEl("td", ["col-md-2"], "", { contentEditable: "true", "data-heading": "Points" });
+    const scoreContainer = createEl("td", ["col-md-2"], "", {
+        "contentEditable": "true",
+        "data-heading": "Points",
+    });
     const score = createEl("h4", [], `100<span class="muted">/100</span>`, {}, { margin: "0px" });
-    scoreContainer.append(score)
+    scoreContainer.append(score);
 
-    let ecTD = createEl("td", ["ec-checkbox"])
-    let checkbox = createEl("input")
-    checkbox.type = "checkbox"
-    checkbox.onclick = () => {recalculateGrade(classID)}
-    ecTD.append(checkbox)
+    // let ecTD = createEl("td", ["ec-checkbox"])
+    // let checkbox = createEl("input")
+    // checkbox.type = "checkbox"
+    // checkbox.onclick = () => {recalculateGrade(classID)}
+    // ecTD.append(checkbox)
+
+    const ectd = createEl("td", ["gpa-settings"], "", {}, { width: "15px", textAlign: "center" });
+    const input = createEl(
+        "input",
+        ["gpa-settings"],
+        "",
+        {
+            type: "checkbox",
+            disabled: true,
+        },
+        { margin: "auto" }
+    );
+    ectd.appendChild(input);
 
     row.append(
-        ecTD,
+        ectd,
         createEl("td", ["col-md-3"], "New Assignment"),
         createEl("td", ["col-md-1"], "N/A"),
         createEl("td", ["col-md-1"], "N/A"),
         scoreContainer,
-        createEl("td", [], "Hypothetical Assignment"),
-    )
+        createEl("td", [], "Hypothetical Assignment")
+    );
 
     addToolTip(row.children[1] as any, "This is a custom assignment that doesn't actually exist");
 
@@ -41,11 +55,11 @@ export function renderNewAssignment(sectionID: string, classID: string) {
         if (ev.key == "Enter") {
             scoreContainer.blur();
         }
-    }
-    window.addEventListener("keydown", handler)
+    };
+    window.addEventListener("keydown", handler);
 
     scoreContainer.addEventListener("blur", () => {
-        window.removeEventListener("keydown", handler)
+        window.removeEventListener("keydown", handler);
         let text = scoreContainer.innerText;
         text = text.replaceAll(" ", "");
         if (!text.match(/[0-9]+\/[0-9]+/)) {
@@ -70,10 +84,9 @@ export function renderNewAssignment(sectionID: string, classID: string) {
         // above.innerHTML = above.innerHTML.replace("%", "*%");
         // above.setAttribute("data-custom-assignment-dirty", "true");
         // above.setAttribute("data-hover-tooltip", "This section contains one or more custom assignments")
-    })
+    });
 
     enableResetButton(classID);
-
 
     // scoreContainer.onfocusout
 }
