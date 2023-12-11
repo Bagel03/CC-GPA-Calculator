@@ -2,14 +2,16 @@ export function createEl<T extends keyof HTMLElementTagNameMap>(
     tag: T,
     classes: string[] = [],
     innerHTML: string = "",
-    attributes: Record<string, string> = {},
+    attributes: Record<string, any> = {},
     styles: Partial<Record<keyof CSSStyleDeclaration, string>> = {}
 ): HTMLElementTagNameMap[T] {
     const el = document.createElement(tag);
     el.classList.add("CC_GPA_INJECTOR", ...classes);
     el.innerHTML = innerHTML;
     for (const [key, value] of Object.entries(attributes)) {
-        el.setAttribute(key, value);
+        if (typeof value === "function") {
+            el.addEventListener(key.slice(2), value);
+        } else el.setAttribute(key, value);
     }
     for (const [key, value] of Object.entries(styles)) {
         //@ts-ignore
@@ -27,4 +29,3 @@ export function anyElementsPresent(element: HTMLElement | Document = document) {
     const elements = Array.from(element.getElementsByClassName("CC_GPA_INJECTOR"));
     return elements.filter(e => !e.classList.contains("tooltip")).length > 0;
 }
-
