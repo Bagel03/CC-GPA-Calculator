@@ -4,10 +4,11 @@ import { clearAllElements, anyElementsPresent } from "./utils/elements.js";
 import "./utils/polyfills.js";
 
 // Check for new update
-const currentVersion = 3.3;
+const currentVersion = 3.5;
 const lastVersion = localStorage.getItem("gpa-calc-last-version");
 if (!lastVersion || parseFloat(lastVersion) < currentVersion) {
     alert("CC GPA Calculator updated successfully to v" + currentVersion);
+    alert("CC GPA Calculator is currently disabled for repairs");
     localStorage.setItem("gpa-calc-last-version", currentVersion.toString());
 }
 
@@ -17,6 +18,7 @@ const pageStringsToRenderers: Record<string, () => Promise<any>> = {
 };
 
 function main() {
+    return;
     let renderFn: () => Promise<any>;
     for (const [key, fn] of Object.entries(pageStringsToRenderers)) {
         if (location.href.includes(key)) {
