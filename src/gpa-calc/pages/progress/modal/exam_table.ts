@@ -137,7 +137,7 @@ export async function renderExamTable(
 
                     const [_, q1Element, q2Element, examElement, overallElement, gradeElement, gpaElement] =
                         el.parentElement.children as any as HTMLDivElement[];
-                    // grades[el.dataset.gradeType] = new Grade(parseFloat(el.innerHTML));
+                    grades[el.dataset.gradeType] = new Grade(parseFloat(el.innerHTML));
                     grades[GradePeriod.OVERALL] = type.calculateOverallGrade(
                         grades[GradePeriod.Q1],
                         grades[GradePeriod.Q2],
@@ -147,7 +147,9 @@ export async function renderExamTable(
                     overallElement.innerHTML = grades[GradePeriod.OVERALL].getNumbers();
                     gradeElement.innerHTML = grades[GradePeriod.OVERALL].toString();
 
+                    el.innerHTML = grades[el.dataset.gradeType].getNumbers();
                     removeToolTip(el);
+                    removeToolTip(overallElement);
                 });
             }
 

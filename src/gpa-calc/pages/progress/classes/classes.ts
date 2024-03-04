@@ -4,6 +4,7 @@ import { renderLinks } from "./assignments/links.js";
 import { renderResetButton } from "./assignments/reset.js";
 import { renderClassPercentage } from "./percentage.js";
 import { clearAllElements, anyElementsPresent } from "../../../utils/elements.js";
+import { appendExtraCreditInfo } from "./assignments/table_updates.js";
 
 async function renderClassModalAfterFullyLoaded() {
     const name = document.getElementsByClassName("modal-header")[0].children[1].innerHTML;
@@ -13,20 +14,18 @@ async function renderClassModalAfterFullyLoaded() {
         renderClassPercentage(currentClass.sectionid.toString()),
         renderResetButton(),
         renderLinks(currentClass.sectionid.toString()),
-    ]);
+    ]).then(() => appendExtraCreditInfo(currentClass.sectionid.toString()));
 }
 
 function renderClasses() {
     console.log("Will render classes when ready...");
 
     let alreadyRendered = false;
-    const siteModal = document.getElementById("site-modal")!;
 
     const cancelID = setInterval(() => {
         const siteModal = document.getElementById("site-modal");
         if (anyElementsPresent(siteModal)) alreadyRendered = true;
         if (alreadyRendered) return;
-
 
         const progresses = document.getElementsByClassName("progress-bar-info");
         if (progresses.length === 0) {
@@ -36,14 +35,17 @@ function renderClasses() {
                 .catch(err => {
                     clearAllElements(siteModal);
                     alreadyRendered = false;
-                    console.warn("err");
+                    console.warn("err", err);
+                    // if (localStorage.getItem("err")) {
+                    //     throw err;
+                    // }
+
                     // Remove stuff that was already rendered
                     // for (const el of document
                     //     .getElementById("site-modal")
                     //     ?.querySelectorAll("CC_GPA_INJECTOR")) {
                     //     el.remove();
                     // }
-
                 });
             return;
         }

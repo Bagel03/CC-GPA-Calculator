@@ -4,7 +4,8 @@ import { clearAllElements, anyElementsPresent } from "./utils/elements.js";
 import "./utils/polyfills.js";
 
 // Check for new update
-const currentVersion = 3.5;
+const currentVersion = 4.01;
+
 const lastVersion = localStorage.getItem("gpa-calc-last-version");
 if (!lastVersion || parseFloat(lastVersion) < currentVersion) {
     alert("CC GPA Calculator updated successfully to v" + currentVersion);
