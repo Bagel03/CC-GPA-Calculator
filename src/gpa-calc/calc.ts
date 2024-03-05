@@ -4,8 +4,7 @@ import { clearAllElements, anyElementsPresent } from "./utils/elements.js";
 import "./utils/polyfills.js";
 
 // Check for new update
-const currentVersion = 4.01;
-
+const currentVersion = 4.02;
 const lastVersion = localStorage.getItem("gpa-calc-last-version");
 if (!lastVersion || parseFloat(lastVersion) < currentVersion) {
     alert("CC GPA Calculator updated successfully to v" + currentVersion);
@@ -42,7 +41,7 @@ function main() {
                 clearInterval(cancelID);
                 alreadyRendered = false;
             })
-            .catch(() => {
+            .catch(e => {
                 clearAllElements();
                 alreadyRendered = false;
             });

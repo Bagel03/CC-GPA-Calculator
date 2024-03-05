@@ -12,9 +12,14 @@ export async function renderProgressPage() {
     console.log("Rendering progress page");
     const classes = await fetchClasses();
     const markingPeriods = await fetchMarkingPeriods();
-    renderToolTip();
-    setupObserverToRenderClasses();
-    renderGrades(classes);
-    renderBubble(GpaFormula.CC.getAverageGPAFromRawData(classes));
+
+    await Promise.all([
+        renderToolTip(),
+        setupObserverToRenderClasses(),
+        renderGrades(classes),
+        renderBubble(GpaFormula.CC.getAverageGPAFromRawData(classes)),
+    ]).catch(e => {
+        throw new Error(e);
+    });
     // renderModal();
 }
