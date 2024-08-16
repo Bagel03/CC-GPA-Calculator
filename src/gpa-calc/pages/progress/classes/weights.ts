@@ -17,7 +17,13 @@ export type sectionInfo = {
 
 export async function getSectionWeightsAndInfo(classId: string): Promise<sectionInfo> {
     const classData = await fetchAssignments(classId, await getCurrentMarkingPeriod());
+<<<<<<< HEAD
     if (!classData.length) return;
+=======
+    if (!classData.length) {
+        return;
+    }
+>>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
 
     getSettings().classes[classId] ??= {
         type: null,
@@ -37,16 +43,22 @@ export async function getSectionWeightsAndInfo(classId: string): Promise<section
 
     if (classData[0].Weight == null) weights = TOTAL_POINTS; // Total points class
 
+<<<<<<< HEAD
     // Add dropped assignments & extra credit assingments
     const extraCreditAssignments: Record<string, number[]> = {};
     const droppedAssignments: Record<string, number> = {};
+=======
+    // Add dropped assignments & extra credit assignments
+    const extraCreditAssignments: Record<number, number[]> = {};
+    const droppedAssignments: Record<number, number> = {};
+>>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
 
     for (const section of sections) {
         droppedAssignments[section] = settings[section].droppedAssignments || 0;
         settings[section].droppedAssignments = droppedAssignments[section];
 
-        extraCreditAssignments[section] = settings[section].extraCreditAssingments || [];
-        settings[section].extraCreditAssingments = extraCreditAssignments[section];
+        extraCreditAssignments[section] = settings[section].extraCreditAssignments || [];
+        settings[section].extraCreditAssignments = extraCreditAssignments[section];
     }
 
     saveSettings();
@@ -59,21 +71,29 @@ export async function getSectionWeightsAndInfo(classId: string): Promise<section
     if we want it to equal the given grade, 
 */
 export function identifyAnyPossibleExtraCredit(
+<<<<<<< HEAD
     assingments: Record<string, { points: number; max: number }>,
     grade: number,
     droppedAssignments: number
 ): string[] {
     let assingmentsMap = Object.entries(assingments);
+=======
+    assignments: Record<number, { points: number; max: number }>,
+    grade: number,
+    droppedAssignments: number
+) {
+    let assignmentsMap = Object.entries(assignments);
+>>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
 
     while (droppedAssignments > 0) {
-        const min = assingmentsMap.reduce(
+        const min = assignmentsMap.reduce(
             (prevMin, [_, { points, max }]) => Math.min(prevMin, points / max),
             -Infinity
         );
-        assingmentsMap.splice(assingmentsMap.findIndex(([_, { points, max }]) => points / max === min)!, 1);
+        assignmentsMap.splice(assignmentsMap.findIndex(([_, { points, max }]) => points / max === min)!, 1);
     }
 
-    let [totalPoints, maxPoints] = assingmentsMap.reduce(
+    let [totalPoints, maxPoints] = assignmentsMap.reduce(
         ([prevPoints, prevTotal], [_, { points, max }]) => [prevPoints + points, prevTotal + max],
         [0, 0]
     );
@@ -86,6 +106,7 @@ export function identifyAnyPossibleExtraCredit(
     const lookingForAssignmentWorth = maxPoints - desiredMaxPoints;
 
     // first look for one assignment
+<<<<<<< HEAD
     for (const [id, { points, max }] of assingmentsMap) {
         if (max === lookingForAssignmentWorth) return [id];
     }
@@ -97,4 +118,12 @@ export function identifyAnyPossibleExtraCredit(
     return combinatoins
         .find(arg => arg.reduce((prev, curr) => curr[1].max + prev, 0) === lookingForAssignmentWorth)
         ?.map(x => x[0]);
+=======
+    for (const [id, { points, max }] of assignmentsMap) {
+        if (max === lookingForAssignmentWorth) return id;
+    }
+
+    // Now look for a combination of assignments
+    const assignmentsWithLessThanDesired = assignmentsMap.filter(x => x[1].max <= lookingForAssignmentWorth);
+>>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
 }

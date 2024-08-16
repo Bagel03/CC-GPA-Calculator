@@ -2,7 +2,11 @@ import { getUserId } from "./context.js";
 
 const classCache = {} as Record<string, any>;
 
+<<<<<<< HEAD
 export interface assignmentInfo {
+=======
+export interface AssignmentInfo {
+>>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
     AssignmentTypeId: number;
     AssignmentType: string;
     Percentage: string;
@@ -32,7 +36,11 @@ export interface assignmentInfo {
     FormativeInd: boolean;
 }
 
+<<<<<<< HEAD
 export async function fetchAssignments(classId: string, markingPeriod: number): Promise<assignmentInfo[]> {
+=======
+export async function fetchAssignments(classId: string, markingPeriod: number): Promise<AssignmentInfo[]> {
+>>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
     const shortName = classId + "-" + markingPeriod;
     if (classCache[shortName]) {
         return classCache[shortName];
@@ -52,6 +60,7 @@ export async function fetchAssignments(classId: string, markingPeriod: number): 
 
     return result;
 }
+<<<<<<< HEAD
 
 export async function fetchAssignmentsBySection(
     classId: string,
@@ -70,3 +79,5 @@ export async function fetchAssignmentsBySection(
 
     return map;
 }
+=======
+>>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88

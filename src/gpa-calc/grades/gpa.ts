@@ -27,11 +27,11 @@ export class GpaFormula {
     calc(grade: Grade, classType: ClassType) {
         if (!this.processesType(classType)) {
             console.warn(
-                "Tried to get the grade of a ",
-                classType,
-                " class using the ",
+                "Tried to get the grade of a",
+                classType.name,
+                "class using the",
                 this.name,
-                " gpa forumla. This formula ignores these kind of classes, and this may result in an inccorect GPA calculation"
+                "gpa formula. This formula ignores these kind of classes, and this may result in an incorrect GPA calculation"
             );
             return 0;
         }

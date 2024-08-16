@@ -27,3 +27,4 @@ export function anyElementsPresent(element: HTMLElement | Document = document) {
     const elements = Array.from(element.getElementsByClassName("CC_GPA_INJECTOR"));
     return elements.filter(e => !e.classList.contains("tooltip")).length > 0;
 }
+

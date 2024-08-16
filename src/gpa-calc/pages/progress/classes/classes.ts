@@ -14,18 +14,28 @@ async function renderClassModalAfterFullyLoaded() {
         renderClassPercentage(currentClass.sectionid.toString()),
         renderResetButton(),
         renderLinks(currentClass.sectionid.toString()),
+<<<<<<< HEAD
         renderNotes(currentClass.sectionid.toString()),
+=======
+>>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
     ]);
 }
 
 function renderClasses() {
-    console.log("Will render classes when ready....");
+    console.log("Will render classes when ready...");
 
     let alreadyRendered = false;
+<<<<<<< HEAD
     const siteModal = document.getElementById("site-modal");
+=======
+    const siteModal = document.getElementById("site-modal")!;
+
+>>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
     const cancelID = setInterval(() => {
+        const siteModal = document.getElementById("site-modal");
         if (anyElementsPresent(siteModal)) alreadyRendered = true;
         if (alreadyRendered) return;
+
 
         const progresses = document.getElementsByClassName("progress-bar-info");
         if (progresses.length === 0) {
@@ -37,11 +47,12 @@ function renderClasses() {
                     alreadyRendered = false;
                     console.warn("err");
                     // Remove stuff that was already rendered
-                    for (const el of document
-                        .getElementById("site-modal")
-                        ?.querySelectorAll("CC_GPA_INJECTOR")) {
-                        el.remove();
-                    }
+                    // for (const el of document
+                    //     .getElementById("site-modal")
+                    //     ?.querySelectorAll("CC_GPA_INJECTOR")) {
+                    //     el.remove();
+                    // }
+
                 });
             return;
         }
@@ -60,7 +71,10 @@ function renderClasses() {
     }, 5);
 }
 
+let observerIsAlreadySetUp = false;
 export function setupObserverToRenderClasses() {
+    if (observerIsAlreadySetUp) return;
+
     let currentlyRendered = false;
     const observer = new MutationObserver(ev => {
         const { classList } = document.body;
@@ -76,4 +90,5 @@ export function setupObserverToRenderClasses() {
     });
 
     observer.observe(document.body, { attributeFilter: ["class"] });
+    observerIsAlreadySetUp = true;
 }
