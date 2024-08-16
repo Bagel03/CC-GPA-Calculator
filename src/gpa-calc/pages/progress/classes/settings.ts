@@ -1,4 +1,4 @@
-import { fetchClassInfo } from "../../../api/class_info";
+import { fetchAssignments } from "../../../api/assignments";
 import { getCurrentMarkingPeriod } from "../../../api/marking_period";
 import { ClassType } from "../../../grades/class_type";
 import { GradePeriod, getNiceNameForGradePeriod } from "../../../grades/exams";
@@ -12,7 +12,7 @@ import { TOTAL_POINTS, WEIGHTED, getSectionWeightsAndInfo } from "./weights";
 
 export async function getClassSettingsBody(classID: string, className: string) {
     const sectionInfo = await getSectionWeightsAndInfo(classID);
-    const classInfo = await fetchClassInfo(classID, await getCurrentMarkingPeriod());
+    const classInfo = await fetchAssignments(classID, await getCurrentMarkingPeriod());
 
     const classSettings = getSettings().classes[classID];
     classSettings.type ??= ClassType.fromName(className);

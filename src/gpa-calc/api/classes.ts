@@ -5,14 +5,48 @@ import { fetchDurations } from "./durations.js";
 
 const classesCache = {} as Record<string, any>;
 
-export const fetchClasses = async function (year: string = getCurrentSchoolYear(), duration?: string) {
+export interface ClassInfo {
+    sectionid: number;
+    sectionidentifier: string;
+    room: null;
+    coursedescription: string;
+    schoollevel: string;
+    groupownername: string;
+    OwnerId: number;
+    groupowneremail: string;
+    groupownerphoto: string;
+    currentterm: string;
+    assignmentactivetoday: number;
+    assignmentduetoday: number;
+    assignmentassignedtoday: number;
+    OverdueCount: number;
+    UpcomingCount: number;
+    mostrecentgroupphoto: null;
+    AlbumId: null;
+    DurationId: number;
+    gradebookcumgpa: boolean;
+    publishgrouptouser: boolean;
+    markingperiodid: number;
+    leadsectionid: number;
+    cumgrade: string;
+    FilePath: null;
+    PhotoEditSettings: null;
+    AttendanceTaken: boolean;
+    canviewassignments: boolean;
+}
+
+export const fetchClasses = async function (
+    year: string = getCurrentSchoolYear(),
+    duration?: number
+): Promise<ClassInfo[] & { duration: string }> {
     const name = year + "-" + duration;
-    if (classesCache[name]) return classesCache[name]
+    if (classesCache[name]) return classesCache[name];
 
     const userId = (await fetchContext()).UserInfo.UserId;
 
-    const url = new URL("https://catholiccentral.myschoolapp.com/api/datadirect/ParentStudentUserAcademicGroupsGet");
-
+    const url = new URL(
+        "https://catholiccentral.myschoolapp.com/api/datadirect/ParentStudentUserAcademicGroupsGet"
+    );
 
     url.searchParams.set("userId", userId);
     url.searchParams.set("schoolYearLabel", year);
@@ -24,12 +58,11 @@ export const fetchClasses = async function (year: string = getCurrentSchoolYear(
         duration = durations.find(dur => dur.CurrentInd).DurationId;
     }
 
-
-    url.searchParams.set("durationList", duration);
+    url.searchParams.set("durationList", duration.toString());
 
     const classes = await fetch(url).then(res => res.json());
     classes.duration = duration;
 
     classesCache[name] = classes;
     return classes;
-}
+};

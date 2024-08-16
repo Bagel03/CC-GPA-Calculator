@@ -1,5 +1,5 @@
 import { fetchClasses } from "../../../api/classes.js";
-import { fetchClassInfo } from "../../../api/class_info.js";
+import { fetchAssignments } from "../../../api/assignments.js";
 import { ClassType, getNumberOfClassesOfType } from "../../../grades/class_type.js";
 import { createEl } from "../../../utils/elements.js";
 import { renderFooter } from "./quarter/footer.js";

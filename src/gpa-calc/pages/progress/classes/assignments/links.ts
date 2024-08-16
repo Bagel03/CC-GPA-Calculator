@@ -16,7 +16,7 @@ export function renderLinks(classId: string) {
             `<h6>+ Add Assignment</h6>`
         );
         el.hidden = true;
-        el.insertAdjacentElement("beforebegin", newDiv)
+        el.insertAdjacentElement("beforebegin", newDiv);
         // el.replaceWith(newDiv);
         // el.children[0].innerHTML = "➕ Add Assignment";
         // el.classList.remove("back-to-top");

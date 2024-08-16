@@ -9,15 +9,14 @@ export function renderToolTip() {
     document.body.append(toolTip);
 }
 
-export function addToolTip(element: HTMLDivElement, string: string) {
+export function addToolTip(element: HTMLElement, string: string) {
     element.classList.add("has-tooltip");
     element.dataset.toolTipMessage = string;
 
     element.addEventListener("mouseover", () => {
         if (!element.classList.contains("has-tooltip")) return;
 
-        const { top, left, width, height, bottom } =
-            element.getBoundingClientRect();
+        const { top, left, width, height, bottom } = element.getBoundingClientRect();
 
         const tooltipWidth = toolTip.clientWidth;
         const tooltipHeight = toolTip.clientHeight;

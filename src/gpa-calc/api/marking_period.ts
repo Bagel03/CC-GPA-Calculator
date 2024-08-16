@@ -3,7 +3,16 @@ import { getUserId } from "./context.js";
 
 const markingPeriodCache = {};
 
-export async function fetchMarkingPeriods(year?: string, duration?: string) {
+export interface MarkingPeriodInfo {
+    SectionId: number;
+    AvgCumGrade: number;
+    MarkingPeriodId: number;
+    MarkingPeriodDescription: string;
+    CurrentMarkingPeriod: boolean;
+    AvgCumGradeDisplay: string;
+}
+
+export async function fetchMarkingPeriods(year?: string, duration?: number): Promise<MarkingPeriodInfo[]> {
     const shortName = year + "-" + duration;
     if (markingPeriodCache[shortName]) return markingPeriodCache[shortName];
 
@@ -45,23 +54,24 @@ export async function fetchMarkingPeriods(year?: string, duration?: string) {
     url.searchParams.append("personaId", "2");
 
     const classes = await fetchClasses(year, duration);
-    const LeadSectionList = [{
-        DurationId: classes.duration,
-        LeadSectionList: classes.map(c => ({ LeadSectionId: c.sectionid }))
-    }]
-    url.searchParams.append("durationSectionList", JSON.stringify(LeadSectionList))
+    const LeadSectionList = [
+        {
+            DurationId: classes.duration,
+            LeadSectionList: classes.map(c => ({ LeadSectionId: c.sectionid })),
+        },
+    ];
+    url.searchParams.append("durationSectionList", JSON.stringify(LeadSectionList));
 
     const result = await fetch(url).then(res => res.json());
     markingPeriodCache[shortName] = result;
     return result;
 }
 
-
 let currentMarkingPeriod;
-export async function getCurrentMarkingPeriod(): Promise<string> {
+export async function getCurrentMarkingPeriod(): Promise<number> {
     if (currentMarkingPeriod) return currentMarkingPeriod;
 
-    const result = (await fetchMarkingPeriods()).find(p => p.CurrentMarkingPeriod).MarkingPeriodId
+    const result = (await fetchMarkingPeriods()).find(p => p.CurrentMarkingPeriod).MarkingPeriodId;
     currentMarkingPeriod = result;
     return result;
 }

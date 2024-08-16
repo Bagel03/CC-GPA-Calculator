@@ -1,7 +1,7 @@
 export class ClassType {
     private static readonly allClassTypes: ClassType[] = [];
-    static getById(id: number) {
-        return this.allClassTypes.find(c => c.id === id);
+    static getById(id: number | string) {
+        return this.allClassTypes.find(c => c.id == id);
     }
 
     private static nextId: number = 0;

@@ -4,15 +4,17 @@ import { renderLinks } from "./assignments/links.js";
 import { renderResetButton } from "./assignments/reset.js";
 import { renderClassPercentage } from "./percentage.js";
 import { clearAllElements, anyElementsPresent } from "../../../utils/elements.js";
+import { renderNotes } from "./assignments/notes.js";
 
 async function renderClassModalAfterFullyLoaded() {
     const name = document.getElementsByClassName("modal-header")[0].children[1].innerHTML;
     const currentClass = await fetchClasses().then(res => res.find(c => c.sectionidentifier == name));
 
     await Promise.all([
-        renderClassPercentage(currentClass.sectionid),
+        renderClassPercentage(currentClass.sectionid.toString()),
         renderResetButton(),
-        renderLinks(currentClass.sectionid),
+        renderLinks(currentClass.sectionid.toString()),
+        renderNotes(currentClass.sectionid.toString()),
     ]);
 }
 
@@ -20,6 +22,7 @@ function renderClasses() {
     console.log("Will render classes when ready....");
 
     let alreadyRendered = false;
+    const siteModal = document.getElementById("site-modal");
     const cancelID = setInterval(() => {
         if (anyElementsPresent(siteModal)) alreadyRendered = true;
         if (alreadyRendered) return;

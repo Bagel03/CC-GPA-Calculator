@@ -1,35 +1,26 @@
+import { assignmentInfo } from "../../../../api/assignments.js";
 import { getSectionWeightsAndInfo, TOTAL_POINTS } from "../weights.js";
 
 export async function recalculateGrade(classId: string) {
     // Render individual sections
-    const grades = document.querySelectorAll(
-        `[data-heading="Points"]`
-    ) as NodeListOf<HTMLDivElement>;
+    const grades = document.querySelectorAll(`[data-heading="Points"]`) as NodeListOf<HTMLDivElement>;
 
     const sectionTotals = new Map<string, { current: number; max: number }>();
 
-    const { weights, droppedAssignments } = await getSectionWeightsAndInfo(
-        classId
-    );
+    const { weights, droppedAssignments } = await getSectionWeightsAndInfo(classId);
 
-    const assignmentsBySection = new Map<
-        string,
-        { score: number; max: number }[]
-    >();
+    const assignmentsBySection = new Map<string, { score: number; max: number }[]>();
 
     // Load grades
-    grades.forEach((grade) => {
+    grades.forEach(grade => {
         const section =
-            grade.parentElement /* tr */.parentElement
-                ./* tbody */ parentElement /* table */.previousElementSibling
-                .id;
+            grade.parentElement /* tr */.parentElement./* tbody */ parentElement /* table */
+                .previousElementSibling.id;
         if (!sectionTotals.has(section)) {
             sectionTotals.set(section, { current: 0, max: 0 });
         }
 
-        const [score, gradeMax] = grade.innerText
-            .split("/")
-            .map((x) => parseFloat(x));
+        const [score, gradeMax] = grade.innerText.split("/").map(x => parseFloat(x));
 
         if (!assignmentsBySection.has(section)) {
             assignmentsBySection.set(section, []);
@@ -62,15 +53,10 @@ export async function recalculateGrade(classId: string) {
 
     // Calculate the section totals
     assignmentsBySection.forEach((assignments, section) => {
-        assignments = assignments.filter(
-            ({ score, max }) => !(Number.isNaN(score) || Number.isNaN(max))
-        );
+        assignments = assignments.filter(({ score, max }) => !(Number.isNaN(score) || Number.isNaN(max)));
 
         const max = assignments.reduce((prev, curr) => prev + curr.max, 0);
-        const current = assignments.reduce(
-            (prev, curr) => prev + curr.score,
-            0
-        );
+        const current = assignments.reduce((prev, curr) => prev + curr.score, 0);
 
         sectionTotals.set(section, { current, max });
     });
@@ -78,8 +64,7 @@ export async function recalculateGrade(classId: string) {
     sectionTotals.forEach(({ current, max }, sectionID) => {
         const percentage = (current / max) * 100;
         // Set the text above the table
-        document.getElementById(sectionID).querySelector(".muted").innerHTML =
-            percentage.toFixed(2) + "%";
+        document.getElementById(sectionID).querySelector(".muted").innerHTML = percentage.toFixed(2) + "%";
 
         // Set the progress bar
         const bar = document
