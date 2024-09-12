@@ -11,16 +11,11 @@ import { addToolTip } from "../../../utils/tooltip";
 import { TOTAL_POINTS, WEIGHTED, getSectionWeightsAndInfo } from "./weights";
 
 export async function getClassSettingsBody(classID: string, className: string) {
-<<<<<<< HEAD
-    const sectionInfo = await getSectionWeightsAndInfo(classID);
-    const classInfo = await fetchAssignments(classID, await getCurrentMarkingPeriod());
-=======
     const classSettings = (getSettings().classes[classID] ??= {
         sectionInfo: {},
         type: ClassType.fromName(className).id,
         gradeFormula: TOTAL_POINTS,
     });
->>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
 
     const sectionInfo = (await getSectionWeightsAndInfo(classID)) || {
         weights: TOTAL_POINTS,

@@ -33,7 +33,11 @@ class Injector {
     }
 }
 
-console.log("Injecting ");
-Injector.injectScript("bundle.js");
-Injector.injectCss("bundle.css");
+
+
+// if(hasAcceptedAgreement){
+    console.log("Injecting ");
+    Injector.injectScript("bundle.js");
+    Injector.injectCss("bundle.css");
+// }
 // <link rel="stylesheet" href="" />

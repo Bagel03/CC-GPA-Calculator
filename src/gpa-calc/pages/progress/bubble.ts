@@ -1,5 +1,5 @@
 import { createEl } from "../../utils/elements.js";
-import { openModal } from "./modal/modal.js";
+import { openModal, renderModal } from "./modal/modal.js";
 
 export function renderBubble(gpa: number) {
     // Renders the quarter and semester gpa
@@ -42,6 +42,7 @@ export function renderBubble(gpa: number) {
     bubble!.innerHTML = bubbleTitle;
 
     link.onclick = () => {
+        renderModal();
         openModal();
     }
 }

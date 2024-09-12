@@ -66,10 +66,12 @@ function escapeHandler(e: KeyboardEvent) {
 }
 
 export function openModal() {
-    renderModal();
+    const siteModal = document.getElementById("site-modal");
+    // renderModal();
     siteModal.classList.add("modal", "bb-modal", "in");
     siteModal.style.display = "block";
     document.body.classList.add("modal-open", "overflow-none", "gpa-calc-modal-open");
+    document.body.querySelector(".modal-backdrop")?.remove();
     document.body.append(
         createEl("div", ["modal-backdrop", "in"], "", {
             id: "GpaModalBackdrop",
@@ -80,12 +82,13 @@ export function openModal() {
 }
 
 export function closeModal() {
-    siteModal.removeChild(siteModal.children[0]);
+    // siteModal.removeChild(siteModal.children[0]);
+    const siteModal = document.getElementById("site-modal");
 
     siteModal.classList.remove("modal", "bb-modal", "in");
     siteModal.style.display = "none";
     document.body.classList.remove("modal-open", "overflow-none", "gpa-calc-modal-open");
 
-    document.getElementById("GpaModalBackdrop").remove();
+    document.body.querySelector(".modal-backdrop")?.remove();
     window.removeEventListener("keydown", escapeHandler);
 }

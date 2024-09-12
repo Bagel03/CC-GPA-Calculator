@@ -53,7 +53,6 @@ export async function renderTable(
         const name = c.sectionidentifier;
         const type: ClassType = ClassType.fromName(name);
 
-<<<<<<< HEAD
         if (gpaFormula.ignoredClasses.includes(type) && c.cumgrade == null) {
             numIgnored++;
             if (hideIgnoredClasses) row.hidden = true;
@@ -64,22 +63,6 @@ export async function renderTable(
             numWithoutGrades++;
             if (hideNoGradeClasses) row.hidden = true;
         }
-=======
-        row.dataset.classType = type.id.toString();
-        row.dataset.hasGrade = (c.cumgrade != null).toString();
-        rows.push(row);
-
-        // if (gpaFormula.ignoredClasses.includes(type) && c.cumgrade == null) {
-        //     numIgnored++;
-        //     if (hideIgnoredClasses) row.hidden = true;
-        // } else if (gpaFormula.ignoredClasses.includes(type)) {
-        //     numIgnored++;
-        //     if (hideIgnoredClasses) row.hidden = true;
-        // } else if (c.cumgrade == null) {
-        //     numWithoutGrades++;
-        //     if (hideNoGradeClasses) row.hidden = true;
-        // }
->>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
 
         const fakeGrade = c.cumgrade == null;
         const ignoredGrade = gpaFormula.ignoredClasses.includes(type);
@@ -159,77 +142,6 @@ export async function renderTable(
         });
     });
 
-<<<<<<< HEAD
-=======
-    // Bottom text (Table does not include 3 unmarked classes and 2 without grades)
-    // const currentlyIncludesStrs: string[] = [];
-    // const doesNotIncludeStrs: string[] = [];
-    // const strs = (hidden: boolean) => (hidden ? doesNotIncludeStrs : currentlyIncludesStrs);
-
-    // // // Returns "class" or "classes" depending on the number put in
-    // const pluralClass = num => `class${num > 1 ? "es" : ""}`;
-
-    // for (const target of ["hideNoGradeClasses", "hideIgnoredClasses"]) {
-    //     window["CC_GPA_CALC_SHOW_HIDE" + target] = async function () {
-    //         let newNumIgnored = 0;
-    //         let newNumWithoutGrades = 0;
-
-    //         for (const row of rows) {
-    //             row.hidden = false;
-
-    //             const newType = ClassType.getById(row.dataset.classType);
-    //             const newHasGrade = row.dataset.hasGrade.toBool();
-
-    //             if (gpaFormula.ignoredClasses.includes(newType) && !newHasGrade) {
-    //                 newNumIgnored++;
-    //                 if (hideIgnoredClasses) row.hidden = true;
-    //             } else if (gpaFormula.ignoredClasses.includes(newType)) {
-    //                 newNumIgnored++;
-    //                 if (hideIgnoredClasses) row.hidden = true;
-    //             } else if (!newHasGrade) {
-    //                 newNumWithoutGrades++;
-    //                 if (hideNoGradeClasses) row.hidden = true;
-    //             }
-    //         }
-    //         document.getElementById("gpa-table-footer-text").innerHTML = getFooterText(
-    //             newNumIgnored,
-    //             newNumWithoutGrades,
-    //             hideIgnoredClasses,
-    //             hideNoGradeClasses
-    //         );
-
-    //         // table.replaceWith(
-    //         //     await renderTable(gpaFormula, options.hideIgnoredClasses, options.hideNoGradeClasses)
-    //         // );
-    //     };
-    // }
-
-    // if (numIgnored > 0) {
-    //     strs(hideIgnoredClasses).push(
-    //         `${numIgnored} ${pluralClass(numIgnored)} that ${
-    //             numIgnored == 1 ? "does" : "do"
-    //         } not impact GPA (${showHideLink("hideIgnoredClasses")})`
-    //     );
-    // }
-
-    // if (numWithoutGrades > 0) {
-    //     strs(hideNoGradeClasses).push(
-    //         `${numWithoutGrades} ${pluralClass(numWithoutGrades)} without grades (${showHideLink(
-    //             "hideNoGradeClasses"
-    //         )})`
-    //     );
-    // }
-
-    // const currentlyIncludesStr = currentlyIncludesStrs.join(" and ");
-    // const doesNotIncludeStr = doesNotIncludeStrs.join(" or ");
-    // const bothStrs = [currentlyIncludesStr, doesNotIncludeStr].filter(str => !!str);
-
-    // const fullString =
-    //     currentlyIncludesStr !== ""
-    //         ? "Table currently includes " + bothStrs.join(" and does not include ")
-    //         : "Table does not include " + doesNotIncludeStr;
-
->>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
     // const includes = {
     //     [true]: "currently includes",
     //     [false]: "does not include",
@@ -268,7 +180,6 @@ export async function renderTable(
             let newNumIgnored = 0;
             let newNumWithoutGrades = 0;
 
-<<<<<<< HEAD
             for (const row of classRows) {
                 row.hidden = false;
 
@@ -309,134 +220,30 @@ export async function renderTable(
     table.append(
         getFooterText(numIgnored, numWithoutGrades, hideIgnoredClasses, hideNoGradeClasses, showHideLink)
     );
-=======
-    const unmarkedCol = createEl(
-        "th",
-        ["muted"],
-        "", //getFooterText(numIgnored, numWithoutGrades, hideIgnoredClasses, hideNoGradeClasses),
-        { colspan: "5", id: "gpa-table-footer-text" },
-        { textAlign: "center" }
-    );
-    unmarkedRow.append(unmarkedCol);
-
-    hideHiddenClassesInTable(table);
-
->>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
     // table.append(createEl("div", ["muted"], , {}, { margin: "-15px 0px 25px 110px;", width: "100%", textAlign: "center" }))
 
     return table;
 }
 
-<<<<<<< HEAD
-=======
-export function hideHiddenClassesInTable(table?: HTMLTableElement) {
-    table ??= document.getElementById("gpa-table") as HTMLTableElement;
-    const rows = Array.from(table.getElementsByTagName("tr"));
-    // get rid of the footer & header
-    const header = rows.shift();
-    const footer = rows.pop();
-
-    const formula = getCurrentGPAFormula();
-    const hideNoGradeClasses = table.dataset.hideNoGradeClasses.toBool();
-    const hideIgnoredClasses = table.dataset.hideIgnoredClasses.toBool(); // { hideNoGradeClasses, hideIgnoredClasses } = table.dataset;
-
-    let numWithoutGrades = 0;
-    let numIgnored = 0;
-    for (const row of rows) {
-        row.hidden = false;
-        const rowType = ClassType.getById(row.dataset.classType);
-        const rowHasGrade = row.dataset.hasGrade.toBool();
-
-        if (!formula.processesType(rowType) && !rowHasGrade) {
-            numIgnored++;
-            if (hideIgnoredClasses) row.hidden = true;
-        } else if (!formula.processesType(rowType)) {
-            numIgnored++;
-            if (hideIgnoredClasses) row.hidden = true;
-        } else if (!rowHasGrade) {
-            numWithoutGrades++;
-            if (hideNoGradeClasses) row.hidden = true;
-        }
-    }
-
-    footer.firstElementChild.innerHTML = getFooterText(
-        numIgnored,
-        numWithoutGrades,
-        hideIgnoredClasses,
-        hideNoGradeClasses,
-        table
-    );
-}
-
-// @ts-expect-error
-window.CC_GPA_CALC_GPA_TABLE_TOGGLE = function (target: "hideIgnoredClasses" | "hideNoGradeClasses") {
-    const table = document.getElementById("gpa-table");
-    table.dataset[target] = (!table.dataset[target].toBool()).toString();
-    hideHiddenClassesInTable();
-    rerenderAllGPAs();
-};
-
-function showHideLink(target: "hideIgnoredClasses" | "hideNoGradeClasses", table?: HTMLTableElement) {
-    table ??= document.getElementById("gpa-table") as HTMLTableElement;
-    const currentValue = table.dataset[target].toBool();
-    // table.dataset[target] = (!currentValue).toString();
-    const link = createEl(
-        "a",
-        ["accordion-toggle"],
-        currentValue ? "show" : "hide",
-        {},
-        { color: "#007ca6" }
-    );
-    link.addEventListener("click", () => {
-        hideHiddenClassesInTable();
-        rerenderAllGPAs();
-    });
-    // return link;
-    return `<a class="accordion-toggle" style="color: #007ca6" onclick=window.CC_GPA_CALC_GPA_TABLE_TOGGLE("${target}")>${
-        currentValue ? "show" : "hide"
-    }</a>`;
-}
-
-// // Returns "class" or "classes" depending on the number put in
-const pluralClass = num => `class${num > 1 ? "es" : ""}`;
-
->>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
 function getFooterText(
     numIgnored: number,
     numWithoutGrades: number,
     hideIgnoredClasses: boolean,
     hideNoGradeClasses: boolean,
-<<<<<<< HEAD
     showHideLink: (arg: string) => string
 ): HTMLTableRowElement {
     // Bottom text (Table does not include 3 unmarked classes and 2 without grades)
-=======
-    table?: HTMLTableElement
-) {
->>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
     const currentlyIncludesStrs: string[] = [];
     const doesNotIncludeStrs: string[] = [];
     const strs = (hidden: boolean) => (hidden ? doesNotIncludeStrs : currentlyIncludesStrs);
 
-<<<<<<< HEAD
     // // Returns "class" or "classes" depending on the number put in
     const pluralClass = num => `class${num > 1 ? "es" : ""}`;
-=======
-    if (numWithoutGrades > 0) {
-        strs(hideNoGradeClasses).push(
-            `${numWithoutGrades} ${pluralClass(numWithoutGrades)} without grades (${showHideLink(
-                "hideNoGradeClasses",
-                table
-            )})`
-        );
-    }
->>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
 
     if (numIgnored > 0) {
         strs(hideIgnoredClasses).push(
             `${numIgnored} ${pluralClass(numIgnored)} that ${
                 numIgnored == 1 ? "does" : "do"
-<<<<<<< HEAD
             } not impact GPA (${showHideLink("hideIgnoredClasses")})`
         );
     }
@@ -446,9 +253,6 @@ function getFooterText(
             `${numWithoutGrades} ${pluralClass(numWithoutGrades)} without grades (${showHideLink(
                 "hideNoGradeClasses"
             )})`
-=======
-            } not impact GPA (${showHideLink("hideIgnoredClasses", table)})`
->>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
         );
     }
 
@@ -456,7 +260,6 @@ function getFooterText(
     const doesNotIncludeStr = doesNotIncludeStrs.join(" or ");
     const bothStrs = [currentlyIncludesStr, doesNotIncludeStr].filter(str => !!str);
 
-<<<<<<< HEAD
     const fullString =
         currentlyIncludesStr !== ""
             ? "Table currently includes " + bothStrs.join(" and does not include ")
@@ -466,9 +269,4 @@ function getFooterText(
     const unmarkedCol = createEl("th", ["muted"], fullString, { colspan: "5" }, { textAlign: "center" });
     unmarkedRow.append(unmarkedCol);
     return unmarkedRow;
-=======
-    return currentlyIncludesStr !== ""
-        ? "Table currently includes " + bothStrs.join(" and does not include ")
-        : "Table does not include " + doesNotIncludeStr;
->>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
 }

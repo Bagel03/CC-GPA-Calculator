@@ -1,10 +1,25 @@
 import { renderClassPage } from "./pages/class/class.js";
 import { renderProgressPage } from "./pages/progress/progress.js";
 import { clearAllElements, anyElementsPresent } from "./utils/elements.js";
+import { renderCommonElements } from "./common.js";
+
 import "./utils/polyfills.js";
+// Check for agreement
+const hasAcceptedAgreement = localStorage.getItem("gpa-calc-agreement");
+if (!hasAcceptedAgreement) {
+    if(confirm(
+        "CC GPA Calculator agreement:\n\nBy using this extension, you agree to the terms of service. This extension is not affiliated with Catholic Central or MyCC. This extension is not guaranteed to be accurate. It may cause issues. Use at your own risk.\n\nPress OK to accept these terms and continue using the extension."
+    )) {
+        localStorage.setItem("gpa-calc-agreement", "true");
+    } else {
+        throw new Error("User did not accept agreement");
+    }
+}
+
+
 
 // Check for new update
-const currentVersion = 3.2;
+const currentVersion = 5.0;
 const lastVersion = localStorage.getItem("gpa-calc-last-version");
 if (!lastVersion || parseFloat(lastVersion) < currentVersion) {
     alert("CC GPA Calculator updated successfully to v" + currentVersion);
@@ -25,7 +40,9 @@ function main() {
         }
     }
 
-    if (!renderFn) return;
+    if (!renderFn) {
+        renderCommonElements();
+    };
 
     let alreadyRendered = false;
     const cancelID = setInterval(() => {
@@ -39,6 +56,7 @@ function main() {
         renderFn()
             .then(() => {
                 clearInterval(cancelID);
+                renderCommonElements();
                 alreadyRendered = false;
             })
             .catch(() => {

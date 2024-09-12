@@ -4,9 +4,9 @@ import { Grade } from "../../../../grades/grade.js";
 import { createEl } from "../../../../utils/elements.js";
 import { addToolTip, removeToolTip } from "../../../../utils/tooltip.js";
 import { renderExamTable } from "../exam_table.js";
-import { hideHiddenClassesInTable, renderTable } from "./table.js";
+import { renderTable } from "./table.js";
 
-export function renderFooter() {
+export function     renderFooter() {
     const footer = createEl("div", ["modal-footer"]);
 
     const changeFormulaButton = createEl(
@@ -133,7 +133,7 @@ export function getCurrentGPAFormula(): GpaFormula {
 
 export function rerenderAllGPAs() {
     // First, remove any classes that aren't important anymore
-    hideHiddenClassesInTable();
+    // hideHiddenClassesInTable();
 
     const formulaType = getCurrentGPAFormula();
 

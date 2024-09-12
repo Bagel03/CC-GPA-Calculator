@@ -31,7 +31,11 @@ export class ClassType {
         "revelation",
         "chistology",
         "paschal mystery",
-        "ecclesiology" /* ... todo */,
+        "ecclesiology",
+        "ecumenism",
+        "sacramental",
+        "church history"
+        /* ... todo */,
     ]);
 
     public static readonly types = [

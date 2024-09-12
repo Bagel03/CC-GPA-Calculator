@@ -14,7 +14,7 @@ export async function renderProgressPage() {
     const markingPeriods = await fetchMarkingPeriods();
     renderToolTip();
     setupObserverToRenderClasses();
-    renderGrades(classes);
+    await renderGrades(classes);
     renderBubble(GpaFormula.CC.getAverageGPAFromRawData(classes));
     // renderModal();
 }

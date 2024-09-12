@@ -14,10 +14,7 @@ async function renderClassModalAfterFullyLoaded() {
         renderClassPercentage(currentClass.sectionid.toString()),
         renderResetButton(),
         renderLinks(currentClass.sectionid.toString()),
-<<<<<<< HEAD
         renderNotes(currentClass.sectionid.toString()),
-=======
->>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
     ]);
 }
 
@@ -25,12 +22,7 @@ function renderClasses() {
     console.log("Will render classes when ready...");
 
     let alreadyRendered = false;
-<<<<<<< HEAD
     const siteModal = document.getElementById("site-modal");
-=======
-    const siteModal = document.getElementById("site-modal")!;
-
->>>>>>> 46e24e8f9c298327be3405a29a9610bf019a0c88
     const cancelID = setInterval(() => {
         const siteModal = document.getElementById("site-modal");
         if (anyElementsPresent(siteModal)) alreadyRendered = true;
