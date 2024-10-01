@@ -42,6 +42,9 @@ function main() {
 
     if (!renderFn) {
         renderCommonElements();
+        renderFn = () => {
+            return Promise.resolve()
+        }
     };
 
     let alreadyRendered = false;
