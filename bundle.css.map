@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/gpa-calc/styles/hover.css"],
+  "sourcesContent": [".tooltip {\n    background-color: dimgray;\n    color: white;\n    position: absolute;\n    opacity: 0;\n    text-align: center;\n    padding: 5px;\n    width: 15em;\n    transition: opacity 0.2s;\n    pointer-events: none;\n}\n\n.tooltip::after {\n    content: \" \";\n    position: absolute;\n    top: 100%;\n    left: 50%;\n    margin-left: -5px;\n    border-width: 5px;\n    border-style: solid;\n    border-color: dimgray transparent transparent transparent;\n}\n\n.has-tooltip::after {\n    content: \"*\";\n}\n"],
+  "mappings": "AAAA,SACI,yBACA,WACA,kBACA,UACA,kBALJ,YAOI,WACA,uBACA,oBAGJ,eACI,YACA,kBACA,SACA,SACA,iBACA,iBACA,mBACA,yDAGJ,mBACI",
+  "names": []
+}

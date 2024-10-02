@@ -1,0 +1,2 @@
+.tooltip{background-color:#696969;color:#fff;position:absolute;opacity:0;text-align:center;padding:5px;width:15em;transition:opacity .2s;pointer-events:none}.tooltip:after{content:" ";position:absolute;top:100%;left:50%;margin-left:-5px;border-width:5px;border-style:solid;border-color:dimgray transparent transparent transparent}.has-tooltip:after{content:"*"}
+/*# sourceMappingURL=bundle.css.map */
